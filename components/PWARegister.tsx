@@ -1,0 +1,19 @@
+"use client";
+
+import { useEffect } from 'react';
+
+export default function PWARegister() {
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      return;
+    }
+
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // Keep registration failure silent in production UI.
+      });
+    });
+  }, []);
+
+  return null;
+}
