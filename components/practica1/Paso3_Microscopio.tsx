@@ -1,7 +1,17 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-const muestrasMicroscopio = [
+// 1. DEFINICIÓN DE LA INTERFAZ PARA TS
+interface Muestra {
+  id: string;
+  nombre: string;
+  imagen: string;
+  targetMacro: number; 
+  targetMicro: number;
+  mision: string;
+}
+
+const muestrasMicroscopio: Muestra[] = [
   { 
     id: 'mucosa_oral', 
     nombre: 'Epitelio Escamoso (Mucosa Oral)', 
@@ -29,7 +39,9 @@ const muestrasMicroscopio = [
 ];
 
 export default function Paso3_Microscopio() {
-  const [muestraActiva, setMuestraActiva] = useState<any>(null);
+  // 2. USO DE LA INTERFAZ EN EL ESTADO
+  const [muestraActiva, setMuestraActiva] = useState<Muestra | null>(null);
+  
   const [aumento, setAumento] = useState(4); 
   const [luzEncendida, setLuzEncendida] = useState(false);
   const [intensidadLuz, setIntensidadLuz] = useState(70); 
@@ -43,7 +55,6 @@ export default function Paso3_Microscopio() {
 
   const [blur, setBlur] = useState(20); 
 
-  // Algoritmo predictivo de plano focal
   useEffect(() => {
     if (muestraActiva) {
       const distMacro = Math.abs(macro - muestraActiva.targetMacro);
@@ -67,7 +78,8 @@ export default function Paso3_Microscopio() {
     }
   }, [macro, micro, muestraActiva, aumento, aceiteAplicado]);
 
-  const montarLamina = (muestra: any) => {
+  // 3. USO DE LA INTERFAZ EN LA FUNCIÓN
+  const montarLamina = (muestra: Muestra) => {
     setMuestraActiva(muestra);
     setAumento(4); 
     setMacro(0);   
@@ -77,20 +89,18 @@ export default function Paso3_Microscopio() {
     setAceiteAplicado(false); 
   };
 
-  // NUEVO: Función de Escala Perceptiva para evitar pixelación destructiva CSS
   const obtenerEscalaVisual = (zoom: number) => {
     switch(zoom) {
-      case 4: return 1;       // Vista de campo amplio
-      case 10: return 1.8;    // Acercamiento moderado
-      case 40: return 3.5;    // Detalle profundo celular
-      case 100: return 6;     // Inmersión total controlada
+      case 4: return 1;
+      case 10: return 1.8;
+      case 40: return 3.5;
+      case 100: return 6;
       default: return 1;
     }
   };
 
   return (
     <div className="flex flex-col w-full max-w-7xl mx-auto p-4 lg:p-6 text-slate-200">
-      
       <div className="mb-6">
         <div className="text-teal-500 font-bold text-xs tracking-widest mb-2 uppercase">Estación 03</div>
         <h1 className="text-3xl lg:text-4xl font-extrabold text-white mb-3">Simulador de Microscopía Óptica y Exploración de Campo</h1>
@@ -110,10 +120,7 @@ export default function Paso3_Microscopio() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
-        {/* PANEL LATERAL DE CONTROLES */}
         <div className="w-full lg:w-1/3 flex flex-col gap-4">
-          
           <div className="bg-slate-900/80 border border-slate-700/50 p-4 rounded-xl shadow-md flex flex-col gap-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-2">
               <h3 className="text-yellow-400 font-bold text-xs uppercase tracking-wider">Sistema de Iluminación</h3>
@@ -239,9 +246,7 @@ export default function Paso3_Microscopio() {
           </div>
         </div>
 
-        {/* COMPONENTE VISUALIZADOR OCULAR */}
         <div className="flex-1 bg-black border-[10px] border-slate-800 rounded-3xl p-4 flex flex-col items-center justify-center relative shadow-2xl overflow-hidden min-h-[460px]">
-          
           <div className="absolute top-4 left-4 w-28 h-28 bg-slate-900 rounded-lg border-2 border-slate-700 shadow-lg z-20 flex items-center justify-center overflow-hidden">
             <span className="absolute top-1 left-2 text-[8px] text-slate-500 font-bold uppercase tracking-widest">Platina</span>
             <div 
@@ -266,7 +271,6 @@ export default function Paso3_Microscopio() {
           </div>
 
           <div className="w-[300px] h-[300px] md:w-[450px] md:h-[450px] rounded-full border-4 border-black bg-slate-950 flex items-center justify-center overflow-hidden relative shadow-[inset_0_0_80px_rgba(0,0,0,1)] bg-no-repeat">
-            
             {!luzEncendida && (
               <div className="absolute inset-0 bg-black shadow-inner z-10 flex items-center justify-center">
                 <span className="text-slate-800 text-[10px] font-bold uppercase tracking-widest font-mono">Sistema sin Iluminación</span>
@@ -288,7 +292,6 @@ export default function Paso3_Microscopio() {
               <div 
                 className="w-[180%] h-[180%] flex items-center justify-center transition-all duration-300 ease-out absolute z-0"
                 style={{
-                  // AQUÍ SE APLICA LA NUEVA ESCALA PERCEPTIVA
                   transform: `scale(${obtenerEscalaVisual(aumento)})`,
                   filter: `blur(${blur}px) brightness(${(intensidadLuz / 100) * (blur === 0 ? 1.05 : 0.88)})`
                 }}
@@ -328,7 +331,6 @@ export default function Paso3_Microscopio() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
