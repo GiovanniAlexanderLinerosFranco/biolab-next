@@ -288,25 +288,24 @@ export default function Paso3_Microscopio() {
               </div>
             )}
 
-            {luzEncendida && muestraActiva && (
-              <div 
-                className="w-[180%] h-[180%] flex items-center justify-center transition-all duration-300 ease-out absolute z-0"
-                style={{
-                  transform: `scale(${obtenerEscalaVisual(aumento)})`,
-                  filter: `blur(${blur}px) brightness(${(intensidadLuz / 100) * (blur === 0 ? 1.05 : 0.88)})`
-                }}
-              >
-                <img 
-                  src={muestraActiva.imagen} 
-                  alt="Placa Histológica"
-                  className="w-full h-full object-cover opacity-95 transition-transform duration-100 ease-linear"
-                  style={{ 
-                    transform: `translate(${(carroX - 50) * -1.8}%, ${(carroY - 50) * -1.8}%)`
-                  }}
-                />
-              </div>
-            )}
-
+{luzEncendida && muestraActiva && (
+  <div 
+    className="w-[180%] h-[180%] flex items-center justify-center transition-all duration-300 ease-out absolute z-0"
+    style={{
+      transform: `scale(${obtenerEscalaVisual(aumento)})`,
+      filter: `blur(${blur}px) brightness(${(intensidadLuz / 100) * (blur === 0 ? 1.05 : 0.88)})`
+    }}
+  >
+    <img 
+      src={muestraActiva.imagen} 
+      alt="Placa Histológica"
+      className="w-full h-full object-cover opacity-95 transition-transform duration-100 ease-linear"
+      style={{ 
+        transform: `translate(${(carroX - 50) * -1.8}%, ${(carroY - 50) * -1.8}%)`
+      }}
+    />
+  </div>
+)}
             {luzEncendida && (
               <>
                 <div className="absolute inset-0 pointer-events-none border-t border-slate-900/20 w-full top-1/2 z-20"></div>

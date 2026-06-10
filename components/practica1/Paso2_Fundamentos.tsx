@@ -129,8 +129,7 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
               )}
               <div>
                 <h4 className="text-amber-500 text-xs font-black uppercase tracking-widest mb-1">Desafío Rápido</h4>
-                <p className="text-amber-100/90 text-sm italic">"{especimenActual.desafio}"</p>
-              </div>
+                <p className="text-amber-100/90 text-sm italic">&quot;{especimenActual.desafio}&quot;</p>              </div>
               <div className="relative">
                 <textarea
                   value={respuestasDesafios[especimenActual.id] || ''}
