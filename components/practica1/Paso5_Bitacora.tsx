@@ -82,8 +82,6 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
     setGuardando(true);
 
     // --- MOTOR DE EVALUACIÓN: RÚBRICA 4 (COMPONENTE PRÁCTICO) ---
-    
-    // LLAVE MAESTRA DE REFERENCIA
     const LLAVE = {
       A: { t: 'acelular', f: 'irregular', e: 'capside' },
       B: { t: 'procariota', f: 'alargada', e: 'pared' }, 
@@ -92,17 +90,14 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
       E: { t: 'eucariota_hongo', f: 'filamentosa', e: 'pared' }
     };
 
-    // 1. DESEMPEÑO PRÁCTICO (40%) - Precisión Técnica en Tabla
     let aciertos = 0;
     (Object.keys(bitacoraMuestras) as MuestraId[]).forEach(l => {
       if (bitacoraMuestras[l].tipo === LLAVE[l].t) aciertos++;
       if (bitacoraMuestras[l].forma === LLAVE[l].f) aciertos++;
       if (bitacoraMuestras[l].estructuraClave === LLAVE[l].e) aciertos++;
     });
-    // Escala proporcional de 1.0 a 5.0 para el 40%
     const notaDesempeno = (aciertos / 15) * 4.0 + 1.0;
 
-    // 2. INTERPRETACIÓN EXPERIMENTAL (60%) - Profundidad de Análisis
     const textoTotal = (analisisContraste + conclusiones.pregunta1 + conclusiones.pregunta2 + conclusiones.pregunta3).toLowerCase();
     const glosario = ['organelo', 'eucariota', 'procariota', 'membrana', 'pared', 'núcleo', 'diferenciación', 'bioseguridad', 'cloroplasto', 'citoplasma'];
     const conteoKeywords = glosario.filter(w => textoTotal.includes(w)).length;
@@ -111,14 +106,12 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
     let notaInterpretacion = 1.0;
     let nivel = "";
 
-    // Mapeo exacto a los niveles de la rúbrica institucional
     if (longitudTotal > 650 && conteoKeywords >= 6) { notaInterpretacion = 5.0; nivel = "Excelente (4.6 - 5.0)"; }
     else if (longitudTotal > 450 && conteoKeywords >= 4) { notaInterpretacion = 4.3; nivel = "Sobresaliente (4.0 - 4.5)"; }
     else if (longitudTotal > 300 && conteoKeywords >= 2) { notaInterpretacion = 3.5; nivel = "Aceptable (3.0 - 3.9)"; }
     else if (longitudTotal > 150) { notaInterpretacion = 2.5; nivel = "Insuficiente (2.1 - 2.9)"; }
     else { notaInterpretacion = 1.5; nivel = "Deficiente (1.0 - 2.0)"; }
 
-    // 3. CALIFICACIÓN FINAL PONDERADA
     const notaFinal = (notaDesempeno * 0.4) + (notaInterpretacion * 0.6);
     const notaFinalFixed = parseFloat(Math.max(1.0, notaFinal).toFixed(1));
 
@@ -154,9 +147,13 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
         `⭐ NOTA FINAL: ${notaFinalFixed} / 5.0\n\n` +
         `La bitácora ha sido archivada legalmente en el sistema.`
       );
-    } catch (err: any) {
+    } catch (err: unknown) { // CORRECCIÓN: Se cambió 'any' por 'unknown' para cumplir ESLint
       setEstadoEnvio('error');
-      setMensajeError(err.message);
+      if (err instanceof Error) {
+        setMensajeError(err.message);
+      } else {
+        setMensajeError("Error desconocido al enviar");
+      }
     } finally { setGuardando(false); }
   };
 
@@ -238,7 +235,6 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
             </table>
           </div>
 
-          {/* VISTA MÓVIL: TARJETAS (RESTAURADO COMPLETO) */}
           <div className="md:hidden space-y-4">
             {(['A', 'B', 'C', 'D', 'E'] as const).map((letra) => (
               <div key={letra} className="bg-slate-950/40 border border-slate-800 rounded-xl p-4 space-y-4">
