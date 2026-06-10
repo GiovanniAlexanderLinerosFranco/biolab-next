@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
+// Importación de las 4 estaciones restantes
 import Paso1_Bioseguridad from '@/components/practica1/Paso1_Bioseguridad';
 import Paso2_Fundamentos from '@/components/practica1/Paso2_Fundamentos';
 import Paso3_Microscopio from '@/components/practica1/Paso3_Microscopio';
@@ -9,7 +10,10 @@ import Paso5_Bitacora from '@/components/practica1/Paso5_Bitacora';
 
 export default function Practica1Interactive() {
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // ESTADOS GLOBALES DE LA PRÁCTICA
   const [estudianteNombre, setEstudianteNombre] = useState('');
+  const [estudianteEmail, setEstudianteEmail] = useState(''); // <-- NUEVO ESTADO PARA EL CORREO
   
   const [respuestasDesafios, setRespuestasDesafios] = useState({
     virus: '',
@@ -19,6 +23,7 @@ export default function Practica1Interactive() {
     protozoo: ''
   });
 
+  // Definición de las 4 estaciones (Paso 4 eliminado)
   const steps = ["Bioseguridad", "Diversidad", "Microscopía", "Bitácora"];
 
   return (
@@ -54,6 +59,7 @@ export default function Practica1Interactive() {
                     : 'bg-slate-900 border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >
+                <span className="opacity-50 mr-1.5">{i + 1}.</span>
                 {s}
               </button>
             ))}
@@ -64,12 +70,17 @@ export default function Practica1Interactive() {
         <section className="bg-slate-900/60 border border-slate-700/50 rounded-[2rem] p-6 md:p-10 min-h-[600px] shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col justify-between">
            
            <div className="flex-1 w-full">
+             {/* ESTACIÓN 01: BIOSEGURIDAD */}
              {currentStep === 0 && (
                <Paso1_Bioseguridad 
                  estudianteNombre={estudianteNombre} 
-                 setEstudianteNombre={setEstudianteNombre} 
+                 setEstudianteNombre={setEstudianteNombre}
+                 estudianteEmail={estudianteEmail}
+                 setEstudianteEmail={setEstudianteEmail}
                />
              )}
+
+             {/* ESTACIÓN 02: DIVERSIDAD */}
              {currentStep === 1 && (
                <Paso2_Fundamentos 
                  estudianteNombre={estudianteNombre}
@@ -77,16 +88,21 @@ export default function Practica1Interactive() {
                  setRespuestasDesafios={setRespuestasDesafios} 
                />
              )}
+
+             {/* ESTACIÓN 03: MICROSCOPÍA */}
              {currentStep === 2 && <Paso3_Microscopio />}
+
+             {/* ESTACIÓN 04: BITÁCORA (Anteriormente Paso 5) */}
              {currentStep === 3 && (
                <Paso5_Bitacora 
                  estudianteNombre={estudianteNombre} 
+                 estudianteEmail={estudianteEmail} // Pasamos el correo para el envío final
                  respuestasDesafios={respuestasDesafios}
                />
              )}
            </div>
 
-           {/* CONTROLES INFERIORES */}
+           {/* CONTROLES INFERIORES DE NAVEGACIÓN */}
            <div className="mt-12 flex justify-between items-center w-full max-w-4xl mx-auto border-t border-slate-700/50 pt-8">
              <button 
                onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))} 
@@ -97,7 +113,7 @@ export default function Practica1Interactive() {
                    : 'bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-700 shadow-xl'
                }`}
              >
-               Anterior
+               Estación Anterior
              </button>
              
              {currentStep < steps.length - 1 ? (
@@ -108,8 +124,8 @@ export default function Practica1Interactive() {
                  Siguiente Estación
                </button>
              ) : (
-               <div className="text-xs font-mono text-slate-500 uppercase tracking-wider italic">
-                 Diligencie su informe arriba para finalizar
+               <div className="text-xs font-mono text-teal-500 font-bold uppercase tracking-wider italic animate-pulse">
+                 Diligencie su bitácora para finalizar el reporte científico
                </div>
              )}
            </div>
