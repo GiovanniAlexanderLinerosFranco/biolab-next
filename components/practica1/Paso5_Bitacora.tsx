@@ -58,7 +58,13 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
   });
 
   const [analisisContraste, setAnalisisContraste] = useState('');
-  const [conclusiones, setConclusiones] = useState({ pregunta1: '', pregunta2: '', pregunta3: '' });
+  
+  // Tipamos el estado de conclusiones para evitar el uso de 'any' al acceder a las propiedades
+  const [conclusiones, setConclusiones] = useState<Record<string, string>>({ 
+    pregunta1: '', 
+    pregunta2: '', 
+    pregunta3: '' 
+  });
 
   const prevenirFraude = (e: React.ClipboardEvent | React.DragEvent) => {
     e.preventDefault();
@@ -93,9 +99,13 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
       }]);
       if (error) throw error;
       setEstadoEnvio('success');
-    } catch (err: any) {
+    } catch (err: unknown) { // Corregido: any -> unknown
       setEstadoEnvio('error');
-      setMensajeError(err.message);
+      if (err instanceof Error) {
+        setMensajeError(err.message);
+      } else {
+        setMensajeError("Error desconocido al enviar");
+      }
     } finally { setGuardando(false); }
   };
 
@@ -129,7 +139,7 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
             <h2 className="text-xl font-bold text-white">Registro Panorama A-E</h2>
           </div>
 
-          {/* VISTA PC: TABLA (Se oculta en móviles) */}
+          {/* VISTA PC: TABLA */}
           <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-800">
             <table className="w-full text-left border-collapse bg-slate-950/40 text-xs">
               <thead>
@@ -178,7 +188,7 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
             </table>
           </div>
 
-          {/* VISTA MÓVIL: TARJETAS (Se oculta en PC) */}
+          {/* VISTA MÓVIL: TARJETAS */}
           <div className="md:hidden space-y-4">
             {(['A', 'B', 'C', 'D', 'E'] as const).map((letra) => (
               <div key={letra} className="bg-slate-950/40 border border-slate-800 rounded-xl p-4 space-y-4">
@@ -224,7 +234,7 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
           </div>
         </div>
 
-        {/* ACTIVIDAD 02: MATRIZ DE CONTRASTE (Recuperada) */}
+        {/* ACTIVIDAD 02: MATRIZ DE CONTRASTE (RESTAURADA) */}
         <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 md:p-6 shadow-xl">
           <div className="mb-4 md:mb-6">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block mb-1">Actividad 02</span>
@@ -278,10 +288,10 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
               <label className="block text-xs font-bold text-slate-300 leading-snug">{q.label}</label>
               <textarea required onPaste={prevenirFraude} onDrop={prevenirFraude}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs md:text-sm focus:border-purple-500 outline-none h-24 md:h-20"
-                value={(conclusiones as any)[q.id]}
+                value={conclusiones[q.id]} // Corregido: Acceso directo gracias al tipo Record
                 onChange={(e) => setConclusiones({...conclusiones, [q.id]: e.target.value.substring(0, LIMITE_CUESTIONARIO)})}
               />
-              <div className="text-[10px] text-slate-500 text-right font-mono font-bold">{(conclusiones as any)[q.id].length}/{LIMITE_CUESTIONARIO}</div>
+              <div className="text-[10px] text-slate-500 text-right font-mono font-bold">{conclusiones[q.id].length}/{LIMITE_CUESTIONARIO}</div>
             </div>
           ))}
         </div>

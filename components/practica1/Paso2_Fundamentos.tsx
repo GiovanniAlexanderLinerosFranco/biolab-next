@@ -13,7 +13,7 @@ interface Especimen {
   desafio: string;
 }
 
-// Datos de los especímenes: Simplificados pedagógicamente para 1er semestre
+// Datos de los especímenes
 const especimenes: Especimen[] = [
   {
     id: 'virus',
@@ -65,7 +65,7 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
   const especimenActual = especimenes[activo];
   const limiteCaracteres = 250;
 
-  // FUNCIÓN ANTI-FRAUDE: Bloquea el pegado y arrastre de texto externo
+  // FUNCIÓN ANTI-FRAUDE
   const prevenirFraude = (e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
     alert("🛡️ Medida Académica: Para fomentar la síntesis y el aprendizaje, debes digitar tu respuesta manualmente. No se permite pegar texto de fuentes externas o IA.");
@@ -83,7 +83,6 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
 
   return (
     <div className="flex flex-col w-full max-w-6xl mx-auto p-6">
-      
       {/* TÍTULO Y GUÍA DE USO */}
       <div className="mb-6">
         <div className="text-blue-500 font-bold text-xs tracking-widest mb-2 uppercase tracking-[0.2em]">Estación 02</div>
@@ -99,7 +98,6 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
         {/* COLUMNA IZQUIERDA: MENÚ DE NAVEGACIÓN */}
         <div className="flex flex-col gap-3 w-full lg:w-1/4">
           {especimenes.map((item, index) => (
@@ -114,7 +112,6 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
             >
               <div className="flex justify-between items-center">
                 <span>{item.nombre}</span>
-                {/* Indicador de completado */}
                 {(respuestasDesafios[item.id]?.length ?? 0) > 10 && (
                   <span className="text-teal-400 text-xs font-black animate-pulse">✓</span>
                 )}
@@ -125,15 +122,13 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
 
         {/* COLUMNA DERECHA: VISUALIZADOR Y ENTRADA DE DATOS */}
         <div className="flex-1 bg-slate-900/80 border border-slate-700/50 rounded-2xl p-6 flex flex-col lg:flex-row gap-8 shadow-2xl backdrop-blur-md">
-          
-          {/* SECCIÓN DE IMAGEN (Sin espacios vacíos) */}
+          {/* SECCIÓN DE IMAGEN */}
           <div className="w-full lg:w-1/2 flex items-center justify-center bg-black/40 rounded-xl border border-slate-700/50 overflow-hidden relative min-h-[350px] group">
              <img 
                src={especimenActual.imagen} 
                alt={especimenActual.nombre} 
                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
              />
-             {/* Gradiente sutil decorativo sobre la imagen */}
              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60"></div>
              <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
                 <span className="text-[10px] text-white/80 font-mono uppercase tracking-widest">Vista Microscópica</span>
@@ -153,8 +148,6 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
 
             {/* CAJÓN DEL DESAFÍO RÁPIDO */}
             <div className="border border-amber-700/50 bg-amber-900/10 p-5 rounded-2xl flex flex-col gap-4 relative">
-              
-              {/* Bloqueo por falta de identidad */}
               {!estudianteNombre && (
                 <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl z-20 flex flex-col items-center justify-center p-6 text-center">
                   <div className="bg-amber-500/20 p-3 rounded-full mb-3">
@@ -172,7 +165,10 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
                   <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
                   Desafío Rápido de Análisis
                 </h4>
-                <p className="text-amber-100/90 text-sm font-medium leading-snug">"{especimenActual.desafio}"</p>
+                {/* SOLUCIÓN AL ERROR DE ESLINT: Uso de entidades para las comillas */}
+                <p className="text-amber-100/90 text-sm font-medium leading-snug">
+                  &quot;{especimenActual.desafio}&quot;
+                </p>
               </div>
 
               <div className="relative">
@@ -185,7 +181,6 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
                   className="w-full bg-slate-950/70 border border-amber-900/40 rounded-xl p-4 text-sm text-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 focus:outline-none resize-none min-h-[130px] transition-all placeholder:text-slate-700"
                 />
                 
-                {/* CONTADOR DE CARACTERES */}
                 <div className={`text-right text-[10px] mt-2 font-mono font-bold tracking-widest ${
                   (respuestasDesafios[especimenActual.id]?.length || 0) >= limiteCaracteres 
                   ? 'text-rose-500' 
@@ -199,7 +194,7 @@ export default function Paso2_Fundamentos({ estudianteNombre, respuestasDesafios
         </div>
       </div>
 
-      {/* PIE DE ESTACIÓN */}
+      {/* PIE DE ESTACIÓN (Las líneas que se habían perdido) */}
       <div className="mt-8 text-center">
         <p className="text-[10px] text-slate-600 font-mono uppercase tracking-[0.3em]">
           BioLab Interactive System • Registro Digital de Evidencia
