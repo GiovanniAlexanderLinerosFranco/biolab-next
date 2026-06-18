@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import { QRCodeSVG } from 'qrcode.react'; // <-- Nueva importación de la librería instalada
 
 const practicasSilabousta = [
   { id: 1, numero: "01", titulo: "Bioseguridad, Diversidad y Microscopía", disponible: true, ruta: "/laboratorio/practica1", badge: "ACTIVA HOY" },
@@ -14,13 +15,18 @@ const practicasSilabousta = [
 ];
 
 export default function PanelLaboratorios() {
+  // URL de producción exacta para el escaneo de los celulares en la clase de hoy
+  const urlPractica1 = "https://biolab-next-gw4qux3a0.vercel.app/laboratorio/practica1";
+
   return (
     <main className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-8 relative overflow-hidden">
       {/* GLOW DE FONDO CYBERPUNK */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
       
-      <div className="w-full max-w-6xl mx-auto relative z-10 space-y-8">
-        <header className="bg-slate-950/60 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
+      <div className="w-full max-w-6xl mx-auto relative z-10 space-y-6">
+        
+        {/* ENCABEZADO INSTITUCIONAL */}
+        <header className="bg-slate-950/60 border border-slate-800/80 p-6 rounded-3xl backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
           <div>
             <h1 className="text-2xl font-black text-white uppercase tracking-tight">BioLab Virtual • PWA</h1>
             <p className="text-xs font-mono text-cyan-400">Universidad Santo Tomás — División de Ciencias de la Salud</p>
@@ -31,15 +37,43 @@ export default function PanelLaboratorios() {
           </div>
         </header>
 
-        {/* GRILLA CONTROLADA RESPONSIVE MOBILE-FIRST */}
+        {/* CONTENEDOR EXPANDIDO PARA PROYECTAR EL QR EN LA CLASE (ALTO IMPACTO UX) */}
+        <section className="bg-slate-950/40 border border-cyan-500/20 p-6 rounded-3xl backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-2 flex-1">
+            <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-mono font-black px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">
+              📱 ACCESO AUTÓNOMO PARA ESTUDIANTES
+            </span>
+            <h2 className="text-white font-extrabold text-lg uppercase tracking-tight">Escanee el código para iniciar la práctica</h2>
+            <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+              Proyecte este panel en el aula. Los alumnos pueden escanear el código QR directamente con las cámaras de sus dispositivos móviles para abrir la bitácora interactiva en formato PWA.
+            </p>
+            <div className="text-[11px] font-mono text-cyan-500/80 break-all select-all pt-1">
+              Link alterno: {urlPractica1}
+            </div>
+          </div>
+          
+          {/* RENDER DEL COMPONENTE QR SVG ESTILIZADO */}
+          <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center justify-center shrink-0">
+            <QRCodeSVG 
+              value={urlPractica1} 
+              size={140}
+              bgColor="#ffffff"
+              fgColor="#020617" // Ajustado al Slate-950 base del proyecto para lecturas óptimas
+              level="H" // Alta tolerancia a errores por si la proyección genera reflejos
+              includeMargin={false}
+            />
+          </div>
+        </section>
+
+        {/* GRILLA CONTROLADA RESPONSIVE */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {practicasSilabousta.map((p) => (
             <div 
               key={p.id} 
               className={`relative p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[140px] ${
                 p.disponible 
-                  ? 'border-cyan-500/30 bg-slate-900/40 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] shadow-md' 
-                  : 'border-slate-900 bg-slate-950/20 opacity-40 pointer-events-none'
+                  ? 'border-cyan-500/40 bg-slate-900/40 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] shadow-md' 
+                  : 'border-slate-900 bg-slate-950/20 opacity-30 pointer-events-none'
               }`}
             >
               <div className="flex justify-between items-center mb-2">
