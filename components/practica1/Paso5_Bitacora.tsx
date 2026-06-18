@@ -147,7 +147,7 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
         `⭐ NOTA FINAL: ${notaFinalFixed} / 5.0\n\n` +
         `La bitácora ha sido archivada legalmente en el sistema.`
       );
-    } catch (err: unknown) { // CORRECCIÓN: Se cambió 'any' por 'unknown' para cumplir ESLint
+    } catch (err: unknown) {
       setEstadoEnvio('error');
       if (err instanceof Error) {
         setMensajeError(err.message);
@@ -182,9 +182,12 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
         
         {/* ACTIVIDAD 01: REGISTRO OBSERVACIONAL (TABLA PC) */}
         <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 md:p-6 shadow-xl">
-          <div className="mb-6">
+          <div className="mb-6 border-b border-slate-800/60 pb-3">
             <span className="text-xs font-bold text-teal-400 uppercase tracking-widest block mb-1">Actividad 01</span>
             <h2 className="text-xl font-bold text-white">Registro Panorama A-E</h2>
+            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+              <strong className="text-teal-400">Instrucciones de llenado:</strong> Clasifique cada muestra observada en el microscopio asignando su tipo biológico, morfología tridimensional y la estructura celular clave identificada. En la celda de <span className="text-white">Justificación</span>, detalle la evidencia morfológica exacta que observó y que fundamenta su elección (ej. presencia de cloroplastos visibles, ausencia de núcleo, filamentos entrelazados, etc.).
+            </p>
           </div>
 
           <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-800">
@@ -282,9 +285,12 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
 
         {/* ACTIVIDAD 02: MATRIZ DE CONTRASTE */}
         <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 md:p-6 shadow-xl">
-          <div className="mb-4 md:mb-6">
+          <div className="mb-4 md:mb-6 border-b border-slate-800/60 pb-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block mb-1">Actividad 02</span>
             <h2 className="text-xl font-bold text-white">Contraste de Modelos Celulares</h2>
+            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+              <strong className="text-amber-400">Instrucciones de llenado:</strong> Use la tabla de referencia estática para guiar su argumentación. Redacte un texto analítico que contraste de forma explícita las diferencias dimensionales, estructurales y funcionales observables entre los organismos procariontes y los diferentes reinos eucariontes (animal, vegetal, fúngico). Su texto debe tener una extensión adecuada para validar el nivel interpretativo.
+            </p>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-800 mb-6">
@@ -320,9 +326,12 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
 
         {/* ACTIVIDAD 03: CONCLUSIONES ARGUMENTADAS */}
         <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-4 md:p-6 shadow-xl space-y-6">
-          <div className="mb-2">
+          <div className="mb-2 border-b border-slate-800/60 pb-3">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-widest block mb-1">Actividad 03</span>
             <h2 className="text-xl font-bold text-white">Interpretación y Conclusiones</h2>
+            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800">
+              <strong className="text-purple-400">Instrucciones de llenado:</strong> Responda de forma individual y justificada cada uno de los siguientes cuestionamientos de pensamiento crítico. Conecte los conceptos bioquímicos de organización celular con la práctica médica-odontológica (como la importancia de conocer las barreras estructurales en el control microbiológico).
+            </p>
           </div>
 
           {[
@@ -333,6 +342,7 @@ export default function Paso5_Bitacora({ estudianteNombre, estudianteEmail, resp
             <div key={q.id} className="space-y-2">
               <label className="block text-xs font-bold text-slate-300 leading-snug">{q.label}</label>
               <textarea required onPaste={prevenirFraude} onDrop={prevenirFraude}
+                placeholder="Escriba su respuesta analítica aquí..."
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs md:text-sm focus:border-purple-500 outline-none h-24 md:h-20"
                 value={conclusiones[q.id]}
                 onChange={(e) => setConclusiones({...conclusiones, [q.id]: e.target.value.substring(0, LIMITE_CUESTIONARIO)})}
