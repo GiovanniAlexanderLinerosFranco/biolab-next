@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { QRCodeSVG } from 'qrcode.react'; // <-- Nueva importación de la librería instalada
+import { QRCodeSVG } from 'qrcode.react';
 
 const practicasSilabousta = [
   { id: 1, numero: "01", titulo: "Bioseguridad, Diversidad y Microscopía", disponible: true, ruta: "/laboratorio/practica1", badge: "ACTIVA HOY" },
@@ -15,8 +15,8 @@ const practicasSilabousta = [
 ];
 
 export default function PanelLaboratorios() {
-  // URL de producción exacta para el escaneo de los celulares en la clase de hoy
-  const urlPractica1 = "https://biolab-next-gw4qux3a0.vercel.app/laboratorio/practica1";
+  // URL de producción global libre de Deployment Protection
+  const urlPractica1 = "https://biolab-next.vercel.app/laboratorio/practica1";
 
   return (
     <main className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-8 relative overflow-hidden">
@@ -58,8 +58,8 @@ export default function PanelLaboratorios() {
               value={urlPractica1} 
               size={140}
               bgColor="#ffffff"
-              fgColor="#020617" // Ajustado al Slate-950 base del proyecto para lecturas óptimas
-              level="H" // Alta tolerancia a errores por si la proyección genera reflejos
+              fgColor="#020617" 
+              level="H" 
               includeMargin={false}
             />
           </div>
