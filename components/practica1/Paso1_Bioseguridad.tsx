@@ -1,3 +1,12 @@
+/**
+ * ============================================================================
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v2.6
+ * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
+ * All Rights Reserved.
+ * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
+ * ============================================================================
+ */
+
 "use client";
 import React, { useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
@@ -9,7 +18,7 @@ const reglasBioseguridad = [
     imagen: "/assets/regla1_proteccion.png",
     descripcion: "Use bata cerrada, guantes y cabello recogido antes de manipular cualquier muestra biológica.",
     fases: {
-      antes: "Verifique el estado de sus elementos de protección personal (EPP) y colóqueselos correctamente.",
+      antes: "Verifique el estado de sus elementos de protección personal (EPP) og colóqueselos correctamente.",
       durante: "Mantenga los EPP bien ajustados. Evite tocarse el rostro o ajustar las gafas con guantes contaminados.",
       despues: "Retírese los guantes técnica y cuidadosamente. Lávese las manos de inmediato."
     }
@@ -43,20 +52,29 @@ interface Paso1Props {
   setEstudianteNombre: (val: string) => void;
   estudianteEmail: string;
   setEstudianteEmail: (val: string) => void;
+  estudianteCodigo: string;
+  setEstudianteCodigo: (val: string) => void;
+  estudianteDocumento: string;
+  setEstudianteDocumento: (val: string) => void;
+  onAccesoConcedido: () => void;
 }
 
 export default function Paso1_Bioseguridad({
   estudianteNombre,
   setEstudianteNombre,
   estudianteEmail,
-  setEstudianteEmail
+  setEstudianteEmail,
+  estudianteCodigo,
+  setEstudianteCodigo,
+  estudianteDocumento,
+  setEstudianteDocumento,
+  onAccesoConcedido
 }: Paso1Props) {
   const [reglaActiva, setReglaActiva] = useState(0);
   const [isConnecting, setIsConnecting] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const reglaActual = reglasBioseguridad[reglaActiva];
-
   const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(estudianteEmail);
 
   const iniciarSesionEnSupabase = async () => {
@@ -65,8 +83,18 @@ export default function Paso1_Bioseguridad({
       return;
     }
 
+    if (!estudianteCodigo.trim() || estudianteCodigo.length < 7) {
+      alert("Por favor, ingresa un código institucional válido.");
+      return;
+    }
+
     if (!estudianteEmail.trim() || !correoValido) {
       alert("Por favor, ingresa un correo válido institucional o personal.");
+      return;
+    }
+
+    if (!estudianteDocumento.trim()) {
+      alert("Por favor, ingresa tu documento de identidad.");
       return;
     }
 
@@ -79,6 +107,7 @@ export default function Paso1_Bioseguridad({
     setStatus('idle');
 
     try {
+      // Registrar e inicializar la bitácora de la práctica
       const { error } = await supabase
         .from('bitacoras_practica_1')
         .insert([
@@ -87,7 +116,7 @@ export default function Paso1_Bioseguridad({
             estudiante_email: estudianteEmail,
             respuestas_desafios: {},
             tabla_muestras: {},
-            analisis_contraste: "Inicio de sesión en Paso 1",
+            analis_contraste: "Inicio de sesión en Paso 1",
             conclusiones_preguntas: {}
           }
         ]);
@@ -96,6 +125,10 @@ export default function Paso1_Bioseguridad({
 
       setStatus('success');
       console.log("¡Conexión exitosa! Sesión iniciada en Supabase.");
+      
+      // LIBERACIÓN CORE: Se dispara el acceso controlado a las demás estaciones
+      if (onAccesoConcedido) onAccesoConcedido();
+
     } catch (error) {
       console.error("Error al conectar con Supabase:", error);
       setStatus('error');
@@ -107,15 +140,18 @@ export default function Paso1_Bioseguridad({
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-full max-w-6xl mx-auto p-6">
+      
+      {/* COLUMNA IZQUIERDA: CONTROL DE ENTRADA Y REGLAS */}
       <div className="flex-1 flex flex-col gap-6">
-        <div className="bg-slate-950/80 border-2 border-cyan-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-md">
-          <label className="block text-xs font-black uppercase tracking-widest text-cyan-400 mb-3">
+        <div className="bg-slate-950/80 border-2 border-cyan-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-4">
+          <label className="block text-xs font-black uppercase tracking-widest text-cyan-400">
             🔑 Identificación del Investigador
           </label>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
+            {/* INPUT: NOMBRE */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
                 👤 Nombre completo
               </label>
               <input
@@ -124,24 +160,57 @@ export default function Paso1_Bioseguridad({
                 value={estudianteNombre}
                 onChange={(e) => setEstudianteNombre(e.target.value)}
                 disabled={status === 'success'}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-semibold"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-semibold"
               />
             </div>
 
+            {/* INPUT: CÓDIGO */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                🆔 Código Institucional
+              </label>
+              <input
+                type="text"
+                maxLength={8}
+                placeholder="Ej: 2214056"
+                value={estudianteCodigo}
+                onChange={(e) => setEstudianteCodigo(e.target.value)}
+                disabled={status === 'success'}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-mono font-semibold"
+              />
+            </div>
+
+            {/* INPUT: CORREO */}
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
                 📧 Correo institucional o personal
               </label>
               <input
                 type="email"
-                placeholder="usuario@universidad.edu.co o usuario@gmail.com"
+                placeholder="usuario@universidad.edu.co"
                 value={estudianteEmail}
                 onChange={(e) => setEstudianteEmail(e.target.value)}
                 disabled={status === 'success'}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-semibold"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-semibold"
               />
             </div>
 
+            {/* INPUT: DOCUMENTO */}
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                📄 Documento de Identidad
+              </label>
+              <input
+                type="text"
+                placeholder="Número de documento..."
+                value={estudianteDocumento}
+                onChange={(e) => setEstudianteDocumento(e.target.value)}
+                disabled={status === 'success'}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-100 focus:border-cyan-400 focus:outline-none transition-all font-mono font-semibold"
+              />
+            </div>
+
+            {/* BOTÓN DE ACCIÓN */}
             <button
               onClick={iniciarSesionEnSupabase}
               disabled={isConnecting || status === 'success'}
@@ -168,6 +237,7 @@ export default function Paso1_Bioseguridad({
           </div>
         </div>
 
+        {/* ENCABEZO DE TÍTULOS ASIGNADOS */}
         <div>
           <div className="text-teal-500 font-bold text-xs tracking-widest mb-2 uppercase">
             Estación 01
@@ -188,6 +258,7 @@ export default function Paso1_Bioseguridad({
           </p>
         </div>
 
+        {/* SELECTORES DE REGLAS DE BIOSEGURIDAD */}
         <div className="flex flex-col gap-3 mt-2">
           {reglasBioseguridad.map((regla, index) => (
             <button
@@ -210,6 +281,7 @@ export default function Paso1_Bioseguridad({
         </div>
       </div>
 
+      {/* COLUMNA DERECHA: DESCRIPCIÓN VISUAL Y CONTENIDO PEDAGÓGICO */}
       <div className="flex-1 bg-slate-900/60 border border-slate-700/50 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">{reglaActual.titulo}</h2>
@@ -245,7 +317,21 @@ export default function Paso1_Bioseguridad({
             <p className="text-[11px] text-slate-300 leading-tight">{reglaActual.fases.despues}</p>
           </div>
         </div>
+
+        {/* BOTÓN EXTRA DE SALIDA DE ENTORNO (Se activa al iniciar sesión con éxito) */}
+        {status === 'success' && (
+          <div className="mt-4 pt-4 border-t border-slate-800 flex justify-start">
+            <button 
+              type="button"
+              onClick={() => window.location.href = '/'} 
+              className="px-4 py-2 border border-slate-700 hover:bg-slate-800 rounded-xl text-[11px] font-mono text-slate-400 hover:text-white transition-all"
+            >
+              ← Volver al Dashboard de Prácticas
+            </button>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
