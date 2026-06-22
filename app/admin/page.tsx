@@ -74,9 +74,10 @@ export default function ConsolaAdminPage() {
       if (error) throw error;
       setMensajeOperacion('✓ ¡Ecosistema sincronizado con éxito!');
       await cargarConfiguraciones();
-    } catch (err: any) {
+} catch (err: unknown) {
       console.error(err);
-      setMensajeOperacion(`❌ Error: ${err.message || 'Verifique políticas RLS o conexión'}`);
+      const errorMensaje = err instanceof Error ? err.message : 'Verifique políticas RLS o conexión';
+      setMensajeOperacion(`❌ Error: ${errorMensaje}`);
     } finally {
       setInyectando(false);
     }
