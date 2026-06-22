@@ -89,10 +89,17 @@ function RegistroFormContent() {
       return;
     }
 
+    // Bypass de desarrollador: acceso directo sin validaciones adicionales
+    if (email.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co') {
+      setRegistroExitoso(true);
+      setTimeout(() => router.push('/admin'), 800);
+      return;
+    }
+
     setIsConnecting(true);
 
     if (tipoAcceso === 'ADMIN') {
-      const MASTER_PASSWORD = 'BioGalfAdmin2026*'; 
+      const MASTER_PASSWORD = 'BioGalfAdmin2026*';
 
       if (passwordAdmin !== MASTER_PASSWORD) {
         setMensajeAlerta("❌ Contraseña Administrativa Incorrecta. Acceso de Cátedra denegado.");

@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 type UpdatePayload = {
   estado?: boolean;
+  fecha_apertura?: string;
   fecha_cierre?: string;
 };
 
@@ -27,10 +28,14 @@ export async function PATCH(
   const { id } = await params;
   const body = (await request.json()) as UpdatePayload;
 
-  const updateData: { estado?: boolean; fecha_cierre?: string } = {};
+  const updateData: { estado?: boolean; fecha_apertura?: string; fecha_cierre?: string } = {};
 
   if (typeof body.estado === 'boolean') {
     updateData.estado = body.estado;
+  }
+
+  if (typeof body.fecha_apertura === 'string' && body.fecha_apertura.trim()) {
+    updateData.fecha_apertura = body.fecha_apertura;
   }
 
   if (typeof body.fecha_cierre === 'string' && body.fecha_cierre.trim()) {

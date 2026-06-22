@@ -89,26 +89,30 @@ export default function ConsolaAdminPage() {
     }
   };
 
-  const actualizarFechaCierre = async (id: string, nuevaFecha: string) => {
+  const actualizarFecha = async (
+    id: string,
+    campo: 'fecha_apertura' | 'fecha_cierre',
+    nuevaFecha: string,
+  ) => {
     if (!nuevaFecha) return;
     try {
       const isoFecha = new Date(nuevaFecha).toISOString();
       const response = await fetch(`/api/admin/practicas/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fecha_cierre: isoFecha }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [campo]: isoFecha }),
       });
 
       const payload = (await response.json()) as { ok: boolean; message?: string };
       if (!response.ok || !payload.ok) {
-        throw new Error(payload.message || 'No se pudo actualizar la fecha de cierre.');
+        throw new Error(payload.message || `No se pudo actualizar ${campo}.`);
       }
 
-      setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, fecha_cierre: isoFecha } : p)));
+      setPracticas((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, [campo]: isoFecha } : p)),
+      );
     } catch (err) {
-      console.error("Error al actualizar marca temporal:", err);
+      console.error(`Error al actualizar ${campo}:`, err);
     }
   };
 
@@ -163,8 +167,11 @@ export default function ConsolaAdminPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {practicas.map((practica) => {
-              const fechaFormateada = practica.fecha_cierre 
-                ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16) 
+              const fechaAperturaFormateada = practica.fecha_apertura
+                ? practica.fecha_apertura.replace(' ', 'T').substring(0, 16)
+                : '';
+              const fechaCierreFormateada = practica.fecha_cierre
+                ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16)
                 : '';
 
               return (
@@ -193,13 +200,29 @@ export default function ConsolaAdminPage() {
                     </button>
                   </div>
 
-                  <div className="lg:col-span-5 flex flex-col justify-center">
-                    <input 
-                      type="datetime-local" 
-                      value={fechaFormateada} 
-                      onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)} 
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-cyan-500" 
-                    />
+                  <div className="lg:col-span-5 flex flex-col gap-2 justify-center">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                        Apertura
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={fechaAperturaFormateada}
+                        onChange={(e) => actualizarFecha(practica.id, 'fecha_apertura', e.target.value)}
+                        className="bg-slate-900 border border-emerald-900/60 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[9px] font-mono font-bold text-rose-400 uppercase tracking-widest">
+                        Cierre
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={fechaCierreFormateada}
+                        onChange={(e) => actualizarFecha(practica.id, 'fecha_cierre', e.target.value)}
+                        className="bg-slate-900 border border-rose-900/60 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
                   </div>
                 </div>
               );
