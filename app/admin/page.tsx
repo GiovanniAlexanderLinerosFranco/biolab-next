@@ -4,7 +4,7 @@
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
- * * CONSOLA MAESTRA - SISTEMA DE DETECCIÓN ASÍNCRONA CON TIMEOUT
+ * * CONSOLA MAESTRA - INFRAESTRUCTURA DE DETECCIÓN ASÍNCRONA
  * ============================================================================
  */
 
@@ -37,34 +37,22 @@ export default function ConsolaAdminPage() {
         return;
       }
 
-      // Consulta a Supabase
       const selectPromise = supabase
         .from('ecosistema_configuracion')
         .select('*')
         .order('id', { ascending: true });
 
-      // Promesa de Timeout: si pasa 5 segundos, aborta
-
-const response = await Promise.race([selectPromise, timeoutPromise]);
-const { data, error } = response as { data: PracticaConfig[] | null; error: any };
-
-if (error) throw error;
-
-if (!data || data.length === 0) {
-  setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros en este entorno.");
-} else {
-  setPracticas(data);
-}      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout). Supabase no responde.")), 5000)
       );
 
       const response = await Promise.race([selectPromise, timeoutPromise]);
-      const { data, error } = response as Record<string, unknown>;
+      const { data, error } = response as { data: PracticaConfig[] | null; error: any };
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros en este entorno.");
+        setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros.");
       } else {
         setPracticas(data);
       }
@@ -200,7 +188,7 @@ if (!data || data.length === 0) {
                   <div className="lg:col-span-5 flex flex-col justify-center">
                     <input 
                       type="datetime-local" 
-                     value={fechaFormateada} 
+                      value={fechaFormateada} 
                       onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)} 
                       className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-cyan-500" 
                     />
@@ -214,4 +202,3 @@ if (!data || data.length === 0) {
     </main>
   );
 }
-
