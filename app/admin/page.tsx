@@ -46,8 +46,9 @@ export default function ConsolaAdminPage() {
         setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout). Supabase no responde.")), 5000)
       );
 
-      const response = await Promise.race([selectPromise, timeoutPromise]);
-      const { data, error } = response as { data: PracticaConfig[] | null; error: any };
+      type SelectResponse = { data: PracticaConfig[] | null; error: Error | null };
+      const response = (await Promise.race([selectPromise, timeoutPromise])) as SelectResponse;
+      const { data, error } = response;
 
       if (error) throw error;
 
@@ -81,7 +82,7 @@ export default function ConsolaAdminPage() {
       if (error) throw error;
       setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, estado: !estadoActual } : p)));
       setMensajeOperacion('✓ Cambio guardado exitosamente.');
-    } catch (err: unknown) {
+    } catch {
       setMensajeOperacion(`❌ Error: No se pudo actualizar el estado.`);
     } finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
