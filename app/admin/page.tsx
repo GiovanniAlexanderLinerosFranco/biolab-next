@@ -44,7 +44,17 @@ export default function ConsolaAdminPage() {
         .order('id', { ascending: true });
 
       // Promesa de Timeout: si pasa 5 segundos, aborta
-      const timeoutPromise = new Promise((_, reject) => 
+
+const response = await Promise.race([selectPromise, timeoutPromise]);
+const { data, error } = response as { data: PracticaConfig[] | null; error: any };
+
+if (error) throw error;
+
+if (!data || data.length === 0) {
+  setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros en este entorno.");
+} else {
+  setPracticas(data);
+}      const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout). Supabase no responde.")), 5000)
       );
 
