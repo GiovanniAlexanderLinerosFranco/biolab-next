@@ -49,7 +49,7 @@ export default function ConsolaAdminPage() {
       );
 
       const response = await Promise.race([selectPromise, timeoutPromise]);
-      const { data, error } = response as any;
+      const { data, error } = response as Record<string, unknown>;
 
       if (error) throw error;
 
@@ -204,3 +204,4 @@ export default function ConsolaAdminPage() {
     </main>
   );
 }
+
