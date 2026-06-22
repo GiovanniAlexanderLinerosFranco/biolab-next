@@ -1,17 +1,34 @@
+/**
+ * ============================================================================
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2.0
+ * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
+ * All Rights Reserved.
+ * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
+ * * INTEGRACIÓN CON EL CORE ENGINE DE ASISTENCIA Y VERIFICACIÓN AUTÓNOMA
+ * ============================================================================
+ */
+
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import Paso1_Bioseguridad_P2 from '@/components/practica2/Paso1_Bioseguridad_P2';
 import Paso2_Diagnostico_P2 from '@/components/practica2/Paso2_Diagnostico_P2';
 import Paso3_Atlas_P2 from '@/components/practica2/Paso3_Atlas_P2';
 import Paso4_Bitacora_P2 from '@/components/practica2/Paso4_Bitacora_P2';
+import { verificarLicenciaPropiedadIntelectual } from '@/lib/copyrightGuard';
 
 export default function Practica2Histologia() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Estados de sesión recuperados automáticamente del Core Engine
   const [estudianteNombre, setEstudianteNombre] = useState('');
   const [estudianteEmail, setEstudianteEmail] = useState('');
-  
+  const [estudianteCodigo, setEstudianteCodigo] = useState('');
+  const [licenciaValida, setLicenciaValida] = useState<boolean | null>(null);
+
   const [respuestasDesafios, setRespuestasDesafios] = useState({
     epitelial: '',
     conectivo: '',
@@ -19,7 +36,50 @@ export default function Practica2Histologia() {
     nervioso: ''
   });
 
+  const ID_PRACTICA = 'biolab_p2';
   const steps = ["Flujo Bioseguridad", "Caracterización Tisular", "Simulación Microscópica", "Validación de Bitácora"];
+
+  // Sincronización e Integridad de Datos al cargar la página
+  useEffect(() => {
+    // 1. Validar Propiedad Intelectual y Estado On/Off del Interruptor de la Consola
+    const validarEntorno = async () => {
+      const proteccion = await verificarLicenciaPropiedadIntelectual(ID_PRACTICA);
+      if (!proteccion.autorizado) {
+        setLicenciaValida(false);
+        alert(`SISTEMA BLOQUEADO: ${proteccion.msg}`);
+        router.push('/laboratorio/registro');
+        return;
+      }
+      setLicenciaValida(true);
+    };
+    
+    validarEntorno();
+
+    // 2. Extraer datos de la Pasarela del Viernes (Evita reescritura manual del alumno)
+    const sesionGuardada = localStorage.getItem('biolab_estudiante_sesion');
+    if (sesionGuardada) {
+      try {
+        const datos = JSON.parse(sesionGuardada);
+        setEstudianteNombre(datos.nombre || '');
+        setEstudianteEmail(datos.email || '');
+        setEstudianteCodigo(datos.codigo || '');
+      } catch (e) {
+        console.error("Error al parsear sesión del núcleo:", e);
+      }
+    } else {
+      // Si el vivo intenta entrar directo saltándose la asistencia, lo mandamos de vuelta
+      alert("Acceso Restringido: Debe registrar su asistencia antes de iniciar el simulador.");
+      router.push('/laboratorio/registro');
+    }
+  }, [router]);
+
+  if (licenciaValida === false) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center font-mono text-xs text-red-500">
+        ACCESO INTERRUMPIDO DESDE LA CONSOLA DOCENTE
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen relative font-sans text-slate-200 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -40,10 +100,10 @@ export default function Practica2Histologia() {
         <header className="flex flex-col lg:flex-row justify-between items-center bg-slate-950/70 p-4 md:p-6 rounded-3xl border border-slate-800/80 backdrop-blur-2xl shadow-2xl gap-4">
           <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
             <Link 
-              href="/" 
+              href="/laboratorio/registro" 
               className="px-5 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-500 hover:text-white flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
             >
-              ← Panel Principal
+              ← Panel de Registro
             </Link>
             <div className="text-right lg:text-left">
               <span className="bg-cyan-500/10 text-cyan-400 text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">USTA • División Salud</span>
@@ -105,6 +165,7 @@ export default function Practica2Histologia() {
               <div className="text-[10px] text-slate-400 space-y-1 font-mono">
                 <div>• Desafíos: <span className={Object.values(respuestasDesafios).filter(Boolean).length === 4 ? "text-teal-400 font-bold" : "text-amber-500 font-bold"}>{Object.values(respuestasDesafios).filter(Boolean).length}/4</span></div>
                 <div>• Red: <span className={estudianteNombre ? "text-teal-400 font-bold" : "text-rose-500 font-bold"}>{estudianteNombre ? "ONLINE" : "OFFLINE"}</span></div>
+                {estudianteCodigo && <div className="text-[9px] text-slate-500 block truncate">• Cód: {estudianteCodigo}</div>}
               </div>
             </div>
           </aside>

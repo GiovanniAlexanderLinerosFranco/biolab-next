@@ -1,11 +1,21 @@
+/**
+ * ============================================================================
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.1.0
+ * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
+ * All Rights Reserved.
+ * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
+ * * ENRUTAMIENTO UNIFICADO DEL PANEL DE AULA HACIA REGISTRO DE ASISTENCIA
+ * ============================================================================
+ */
+
 "use client";
 import React from 'react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 
 const practicasSilabousta = [
-  { id: 1, numero: "01", titulo: "Bioseguridad, Diversidad y Microscopía", disponible: true, ruta: "/laboratorio/practica1", badge: "ACTIVA HOY" },
-  { id: 2, numero: "02", titulo: "Entre Células y Capas: Tejidos Humanos", disponible: false, ruta: "/laboratorio/practica2", badge: "BLOQUEADO" },
+  { id: 1, numero: "01", titulo: "Bioseguridad, Diversidad y Microscopía", disponible: true, ruta: "/laboratorio/practica1", badge: "ACTIVA" },
+  { id: 2, numero: "02", titulo: "Entre Células y Capas: Tejidos Humanos", disponible: true, ruta: "/laboratorio/practica2", badge: "ACTIVA MAÑANA" }, // ACTIVADA PARA EL GRUPO DE LAS 8 AM
   { id: 3, numero: "03", titulo: "Receptores de Membrana Celular (ABO/Rh)", disponible: false, ruta: "/laboratorio/practica3", badge: "BLOQUEADO" },
   { id: 4, numero: "04", titulo: "Comunicación Celular y Flujo de Sustancias", disponible: false, ruta: "/laboratorio/practica4", badge: "BLOQUEADO" },
   { id: 5, numero: "05", titulo: "Índice Mitótico y Ciclo Celular", disponible: false, ruta: "/laboratorio/practica5", badge: "BLOQUEADO" },
@@ -15,8 +25,8 @@ const practicasSilabousta = [
 ];
 
 export default function PanelLaboratorios() {
-  // URL de producción global libre de Deployment Protection
-  const urlPractica1 = "https://biolab-next.vercel.app/laboratorio/practica1";
+  // REDIRECCIÓN MAESTRA: El QR ahora apunta a la pasarela inteligente construida el viernes
+  const urlRegistroAsistencia = "https://biolab-next.vercel.app/laboratorio/registro";
 
   return (
     <main className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-8 relative overflow-hidden">
@@ -37,25 +47,25 @@ export default function PanelLaboratorios() {
           </div>
         </header>
 
-        {/* CONTENEDOR EXPANDIDO PARA PROYECTAR EL QR EN LA CLASE (ALTO IMPACTO UX) */}
+        {/* CONTENEDOR EXPANDIDO PARA PROYECTAR EL QR EN LA CLASE */}
         <section className="bg-slate-950/40 border border-cyan-500/20 p-6 rounded-3xl backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
           <div className="space-y-2 flex-1">
             <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-mono font-black px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">
-              📱 ACCESO AUTÓNOMO PARA ESTUDIANTES
+              📱 CONTROL DE ASISTENCIA OBLIGATORIO
             </span>
-            <h2 className="text-white font-extrabold text-lg uppercase tracking-tight">Escanee el código para iniciar la práctica</h2>
+            <h2 className="text-white font-extrabold text-lg uppercase tracking-tight">Escanee el código para registrar su ingreso</h2>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
-              Proyecte este panel en el aula. Los alumnos pueden escanear el código QR directamente con las cámaras de sus dispositivos móviles para abrir la bitácora interactiva en formato PWA.
+              Proyecte este panel en el aula. Los alumnos deben escanear el código QR para validar su identidad institucional antes de iniciar la simulación de microscopía y tejidos.
             </p>
             <div className="text-[11px] font-mono text-cyan-500/80 break-all select-all pt-1">
-              Link alterno: {urlPractica1}
+              Portal de acceso: {urlRegistroAsistencia}
             </div>
           </div>
           
-          {/* RENDER DEL COMPONENTE QR SVG ESTILIZADO */}
+          {/* RENDER DEL COMPONENTE QR ENRUTADO AL REGISTRO */}
           <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center justify-center shrink-0">
             <QRCodeSVG 
-              value={urlPractica1} 
+              value={urlRegistroAsistencia} 
               size={140}
               bgColor="#ffffff"
               fgColor="#020617" 
@@ -79,8 +89,10 @@ export default function PanelLaboratorios() {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-2xl font-mono font-black text-slate-800">{p.numero}</span>
                 <span className={`text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
-                  p.disponible 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse' 
+                  p.id === 2 
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse'
+                    : p.disponible 
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                     : 'bg-slate-800 text-slate-500 border-slate-700'
                 }`}>
                   {p.badge}
@@ -94,7 +106,11 @@ export default function PanelLaboratorios() {
               {p.disponible ? (
                 <Link 
                   href={p.ruta} 
-                  className="w-full text-center py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-cyan-950/50 border border-cyan-400/30"
+                  className={`w-full text-center py-2 text-white font-mono text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg border ${
+                    p.id === 2
+                      ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-950/50 border-amber-400/30'
+                      : 'bg-cyan-600 hover:bg-cyan-500 shadow-cyan-950/50 border-cyan-400/30'
+                  }`}
                 >
                   INGRESAR A LA EXPERIENCIA
                 </Link>
