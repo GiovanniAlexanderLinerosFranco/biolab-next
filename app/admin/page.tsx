@@ -10,7 +10,6 @@
 
 "use client";
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
 
 interface PracticaConfig {
   id: string;
@@ -30,27 +29,21 @@ export default function ConsolaAdminPage() {
   const cargarConfiguraciones = async () => {
     try {
       setErrorSistema(null);
-      
-      if (!supabase) {
-        setErrorSistema("Error de Inyección: El cliente de Supabase no se inicializó.");
-        setCargando(false);
-        return;
-      }
 
-      const selectPromise = supabase
-        .from('ecosistema_configuracion')
-        .select('*')
-        .order('id', { ascending: true });
+      const selectPromise = fetch('/api/admin/practicas', {
+        method: 'GET',
+        cache: 'no-store',
+      }).then((res) => res.json());
 
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout). Supabase no responde.")), 5000)
       );
 
-      type SelectResponse = { data: PracticaConfig[] | null; error: Error | null };
+      type SelectResponse = { ok: boolean; data?: PracticaConfig[]; message?: string };
       const response = (await Promise.race([selectPromise, timeoutPromise])) as SelectResponse;
-      const { data, error } = response;
+      if (!response.ok) throw new Error(response.message || 'No fue posible cargar la configuración.');
 
-      if (error) throw error;
+      const data = response.data ?? [];
 
       if (!data || data.length === 0) {
         setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros.");
@@ -71,34 +64,48 @@ export default function ConsolaAdminPage() {
   }, []);
 
   const toggleEstadoPractica = async (id: string, estadoActual: boolean) => {
-    if (!supabase) return;
     setMensajeOperacion('Sincronizando con el servidor...');
     try {
-      const { error } = await supabase
-        .from('ecosistema_configuracion')
-        .update({ estado: !estadoActual })
-        .eq('id', id);
+      const response = await fetch(`/api/admin/practicas/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ estado: !estadoActual }),
+      });
 
-      if (error) throw error;
+      const payload = (await response.json()) as { ok: boolean; message?: string };
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || 'No se pudo actualizar el estado.');
+      }
+
       setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, estado: !estadoActual } : p)));
       setMensajeOperacion('✓ Cambio guardado exitosamente.');
-    } catch {
-      setMensajeOperacion(`❌ Error: No se pudo actualizar el estado.`);
+    } catch (err: unknown) {
+      const errorMensaje = err instanceof Error ? err.message : 'No se pudo actualizar el estado.';
+      setMensajeOperacion(`❌ Error: ${errorMensaje}`);
     } finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
   };
 
   const actualizarFechaCierre = async (id: string, nuevaFecha: string) => {
-    if (!supabase || !nuevaFecha) return;
+    if (!nuevaFecha) return;
     try {
       const isoFecha = new Date(nuevaFecha).toISOString();
-      const { error } = await supabase
-        .from('ecosistema_configuracion')
-        .update({ fecha_cierre: isoFecha })
-        .eq('id', id);
+      const response = await fetch(`/api/admin/practicas/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fecha_cierre: isoFecha }),
+      });
 
-      if (error) throw error;
+      const payload = (await response.json()) as { ok: boolean; message?: string };
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || 'No se pudo actualizar la fecha de cierre.');
+      }
+
       setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, fecha_cierre: isoFecha } : p)));
     } catch (err) {
       console.error("Error al actualizar marca temporal:", err);

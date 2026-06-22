@@ -11,7 +11,6 @@
 "use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { supabase, isSupabaseConfigured } from '@/lib/supabaseClient';
 
 function RegistroFormContent() {
   const router = useRouter();
@@ -47,26 +46,29 @@ function RegistroFormContent() {
 
   useEffect(() => {
     const verificarDisponibilidad = async () => {
-      if (!supabase) return;
       try {
-        const { data, error } = await supabase
-          .from('ecosistema_configuracion')
-          .select('estado, titulo_practica')
-          .eq('id', idPracticaUrl)
-          .single();
+        const response = await fetch(`/api/registro/practica/${idPracticaUrl}`, {
+          method: 'GET',
+          cache: 'no-store',
+        });
+        const payload = (await response.json()) as {
+          ok: boolean;
+          data?: { estado: boolean; titulo_practica: string };
+        };
 
-        if (error || !data) {
+        if (!response.ok || !payload.ok || !payload.data) {
           setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true });
           return;
         }
 
         setEstadoPractica({
-          activa: data.estado,
-          titulo: data.titulo_practica,
+          activa: payload.data.estado,
+          titulo: payload.data.titulo_practica,
           checked: true
         });
       } catch (err) {
         console.error("Error consultando configuración remota:", err);
+        setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true });
       }
     };
 
@@ -118,43 +120,35 @@ function RegistroFormContent() {
     }
 
     try {
-      if (!supabase || !isSupabaseConfigured) throw new Error("Servidor central fuera de línea.");
-
       const fingerprintHardware = btoa(navigator.userAgent + navigator.hardwareConcurrency).substring(0, 32);
 
-      const { error: errorMatricula } = await supabase
-        .from('ecosistema_matricula')
-        .insert([
-          {
-            codigo_estudiantil: codigo.trim() || documento.trim(),
-            documento_identidad: documento.trim(),
-            correo_institucional: email.trim(),
-            practica_id: idPracticaUrl,
-            device_fingerprint: fingerprintHardware,
-            completado: false
-          }
-        ]);
+      const response = await fetch('/api/registro/ingreso', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: nombre.trim(),
+          email: email.trim(),
+          codigo: codigo.trim(),
+          documento: documento.trim(),
+          practicaId: idPracticaUrl,
+          token: tokenUrl,
+          fingerprint: fingerprintHardware,
+        }),
+      });
 
-      if (errorMatricula && errorMatricula.code === '23505') {
+      const payload = (await response.json()) as { ok: boolean; code?: string; message?: string };
+
+      if (response.status === 409 || payload.code === 'DUPLICATE') {
         setMensajeAlerta("🔒 Alerta de Integridad: Ya existe un registro de asistencia y un intento en curso con estas credenciales.");
         setIsConnecting(false);
         return;
       }
 
-      const tablaBitacoraObjetivo = idPracticaUrl === 'biolab_p2' ? 'bitacoras_practica_2' : 'bitacoras_practica_1';
-
-      await supabase
-        .from(tablaBitacoraObjetivo)
-        .insert([
-          {
-            estudiante_nombre: nombre.trim(),
-            estudiante_email: email.trim(),
-            respuestas_desafios: {},
-            tabla_muestras: {},
-            analis_contraste: `Acceso concedido vía QR Dinámico. Token: ${tokenUrl || 'Directo'}`,
-            conclusiones_preguntas: {}
-          }
-        ]);
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || 'No se pudo completar el registro.');
+      }
 
       localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
         nombre: nombre.trim(),
