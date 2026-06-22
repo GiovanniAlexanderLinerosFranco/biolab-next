@@ -72,43 +72,45 @@ export default function PanelLaboratorios() {
           </div>
         </header>
 
-        {/* PROYECTOR DE AULA CON EL BANNER REAL DEL LABORATORIO USTA */}
-        <section className="relative border border-slate-800/80 rounded-3xl overflow-hidden min-h-[220px] flex items-center shadow-2xl">
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="/assets/banner-guia1.png" 
-              alt="Laboratorio Real USTA" 
-              className="w-full h-full object-cover object-center opacity-40 grayscale"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40"></div>
-          </div>
+{/* PROYECTOR DE AULA CON EL BANNER REAL DEL LABORATORIO USTA (COLORES ORIGINALES) */}
+<section className="relative border border-slate-800/80 rounded-3xl overflow-hidden min-h-[220px] flex items-center shadow-2xl">
+  <div className="absolute inset-0 z-0">
+    <img 
+      src="/assets/banner-guia1.png" 
+      alt="Laboratorio Real USTA" 
+      // CORREGIDO: Eliminado 'grayscale' y subida la opacidad para mantener los colores vivos reales
+      className="w-full h-full object-cover object-center opacity-85 transition-all duration-300"
+    />
+    {/* Máscara de contraste optimizada para no saturar ni apagar los colores originales */}
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent"></div>
+  </div>
 
-          <div className="relative z-10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-            <div className="space-y-2 flex-1">
-              <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-mono font-black px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">
-                📱 CONTROL DE ASISTENCIA REGULADO
-              </span>
-              <h2 className="text-white font-extrabold text-lg uppercase tracking-tight">Escanee para registrar su ingreso</h2>
-              <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-                Proyecte este panel en el aula. Los alumnos deben validar su identidad institucional antes de iniciar los desafíos interactivos programados para la sesión.
-              </p>
-              <div className="text-[11px] font-mono text-cyan-400/80 break-all select-all pt-1">
-                Portal de acceso: {urlRegistroAsistencia}
-              </div>
-            </div>
-            
-            <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center justify-center shrink-0">
-              <QRCodeSVG 
-                value={urlRegistroAsistencia} 
-                size={130}
-                bgColor="#ffffff"
-                fgColor="#020617" 
-                level="H" 
-                includeMargin={false}
-              />
-            </div>
-          </div>
-        </section>
+  <div className="relative z-10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 w-full">
+    <div className="space-y-2 flex-1">
+      <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-mono font-black px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">
+        📱 CONTROL DE ASISTENCIA REGULADO
+      </span>
+      <h2 className="text-white font-extrabold text-lg uppercase tracking-tight">Escanee para registrar su ingreso</h2>
+      <p className="text-xs text-slate-200 leading-relaxed max-w-xl font-medium drop-shadow-md">
+        Proyecte este panel en el aula. Los alumnos deben validar su identidad institucional antes de iniciar los desafíos interactivos programados para la sesión.
+      </p>
+      <div className="text-[11px] font-mono text-cyan-300 font-bold break-all select-all pt-1 drop-shadow-md">
+        Portal de acceso: {urlRegistroAsistencia}
+      </div>
+    </div>
+    
+    <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center justify-center shrink-0">
+      <QRCodeSVG 
+        value={urlRegistroAsistencia} 
+        size={130}
+        bgColor="#ffffff"
+        fgColor="#020617" 
+        level="H" 
+        includeMargin={false}
+      />
+    </div>
+  </div>
+</section>
 
         {/* GRILLA REGULADA POR TU BASE DE DATOS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -197,14 +197,16 @@ function RegistroFormContent() {
             </h1>
           </div>
 
-          <div className="my-6 relative aspect-video w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 shadow-inner">
-            <img 
-              src="/assets/banner-guia1.png" 
-              alt="Laboratorio Biología Celular y Molecular USTA" 
-              className="object-cover w-full h-full opacity-50 grayscale hover:grayscale-0 transition-all duration-500" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-          </div>
+{/* CONTENEDOR MODIFICADO PARA CARGAR LA FOTO DEL LABORATORIO USTA EN COLORES REALES */}
+<div className="my-6 relative aspect-video w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 shadow-inner">
+  <img 
+    src="/assets/banner-guia1.png" 
+    alt="Laboratorio Biología Celular y Molecular USTA" 
+    // CORREGIDO: Eliminado 'grayscale' y ajustada la opacidad
+    className="object-cover w-full h-full opacity-80 transition-all duration-300" 
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+</div>
 
           <div className="relative z-10 text-[10px] font-mono text-slate-500 pt-4 border-t border-slate-900 flex justify-between items-center">
             <span>© 2026 PhD. Giovanni Alexander Lineros F.</span>
