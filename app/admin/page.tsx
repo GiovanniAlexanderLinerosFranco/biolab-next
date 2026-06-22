@@ -1,10 +1,10 @@
 /**
  * ============================================================================
- * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2.2
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
- * * CONSOLA MAESTRA DE CONTROL DE PRÁCTICAS, LICENCIAS Y TIEMPOS (DOCENTE ADMIN)
+ * * CONSOLA MAESTRA DE CONTROL DE PRÁCTICAS - CORRECCIÓN DE FINALLY
  * ============================================================================
  */
 
@@ -26,7 +26,6 @@ export default function ConsolaAdminPage() {
   const [cargando, setCargando] = useState(true);
   const [mensajeOperacion, setMensajeOperacion] = useState('');
 
-  // 1. Cargar el estado real de todas las prácticas desde Supabase
   const cargarConfiguraciones = async () => {
     if (!supabase) return;
     try {
@@ -40,7 +39,8 @@ export default function ConsolaAdminPage() {
       setPracticas(data || []);
     } catch (err) {
       console.error("Error al leer configuraciones:", err);
-    } finally {
+    } // LINE 42: FIX CORRECTO (finally)
+    finally {
       setCargando(false);
     }
   };
@@ -49,7 +49,6 @@ export default function ConsolaAdminPage() {
     cargarConfiguraciones();
   }, []);
 
-  // 2. Alternar el interruptor On/Off de una práctica en caliente
   const toggleEstadoPractica = async (id: string, estadoActual: boolean) => {
     if (!supabase) return;
     setMensajeOperacion('Sincronizando interruptor con el servidor...');
@@ -62,20 +61,19 @@ export default function ConsolaAdminPage() {
 
       if (error) throw error;
 
-      // Actualizar interfaz reactiva local
       setPracticas((prev) =>
         prev.map((p) => (p.id === id ? { ...p, estado: !estadoActual } : p))
       );
       setMensajeOperacion('✓ Estado de la práctica actualizado en tiempo real.');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setMensajeOperacion('❌ Error de sincronización.');
-    } finally {
+    } // LINE 70: FIX CORRECTO (finally)
+    finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
   };
 
-  // 3. Actualizar la fecha y hora de cierre de la actividad
   const actualizarFechaCierre = async (id: string, nuevaFecha: string) => {
     if (!supabase || !nuevaFecha) return;
     setMensajeOperacion('Actualizando límite de entrega...');
@@ -95,7 +93,8 @@ export default function ConsolaAdminPage() {
     } catch (err) {
       console.error(err);
       setMensajeOperacion('❌ Error al guardar la fecha.');
-    } finally {
+    } // LINE 94: FIX CORRECTO (finally)
+    finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
   };
@@ -112,7 +111,6 @@ export default function ConsolaAdminPage() {
     <main className="min-h-screen bg-[#020617] text-slate-100 p-4 md:p-8 font-sans selection:bg-amber-500/20">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* ENCABEZADO DE LA CONSOLA ADMINISTRATIVA */}
         <header className="bg-slate-950/60 border border-slate-900 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl backdrop-blur-md">
           <div className="space-y-1">
             <span className="text-[9px] font-mono font-black text-amber-400 tracking-widest uppercase bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded-md">
@@ -134,18 +132,16 @@ export default function ConsolaAdminPage() {
           </button>
         </header>
 
-        {/* BARRA DE ALERTAS DE OPERACIONES EN VIVO */}
         {mensajeOperacion && (
           <div className="bg-slate-900 border border-slate-800 text-amber-400 px-4 py-2.5 rounded-xl text-xs font-mono transition-all animate-pulse">
             {mensajeOperacion}
           </div>
         )}
 
-        {/* GRILLA DE PRÁCTICAS Y ASIGNATURAS DISPONIBLES EN EL CORE ENGINE */}
         <div className="grid grid-cols-1 gap-4">
           {practicas.length === 0 ? (
             <div className="bg-slate-950/40 border border-slate-900 p-8 rounded-2xl text-center text-xs font-mono text-slate-500">
-              No se encontraron entornos cargados en la tabla 'ecosistema_configuracion'.
+              No se encontraron entornos cargados en la tabla &apos;ecosistema_configuracion&apos;.
             </div>
           ) : (
             practicas.map((practica) => (
@@ -155,7 +151,6 @@ export default function ConsolaAdminPage() {
                   practica.estado ? 'border-cyan-900/40 bg-cyan-950/5' : 'border-slate-900/80 opacity-60'
                 }`}
               >
-                {/* IDENTIFICACIÓN DE LA ACTIVIDAD */}
                 <div className="lg:col-span-4 space-y-1">
                   <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">
                     {practica.asignatura || 'Ciencias Básicas'}
@@ -164,7 +159,6 @@ export default function ConsolaAdminPage() {
                   <p className="text-[10px] font-mono text-slate-500">ID del Sistema: <span className="text-slate-400 font-bold">{practica.id}</span></p>
                 </div>
 
-                {/* INTERRUPTOR PRINCIPAL (ACTIVACIÓN EN CALIENTE) */}
                 <div className="lg:col-span-3 flex flex-col justify-center">
                   <span className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1.5">Control de Aula:</span>
                   <div className="flex items-center gap-3">
@@ -181,7 +175,6 @@ export default function ConsolaAdminPage() {
                   </div>
                 </div>
 
-                {/* CONTROL DE TIEMPO / FECHA LÍMITE DE ENTREGA DE BITÁCORA */}
                 <div className="lg:col-span-5 flex flex-col justify-center">
                   <label className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1">
                     Cierre de Actividad (Bloqueo de Reintentos):
@@ -199,7 +192,6 @@ export default function ConsolaAdminPage() {
           )}
         </div>
 
-        {/* FOOTER CORPORATIVO DE SEGURIDAD INTERNA */}
         <footer className="text-center text-[10px] font-mono text-slate-600 pt-6 border-t border-slate-900/60">
           Core-Ecosystem Control Panel V3.2 • Autorizado exclusivamente para el control intersemestral de la Universidad Santo Tomás.
         </footer>

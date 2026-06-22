@@ -1,9 +1,10 @@
 /**
  * ============================================================================
- * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v2.5
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v2.5.6
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
+ * * RESOLUCIÓN DE COMPATIBILIDAD DE DISPATCH SIN CASTEO SEGURO
  * ============================================================================
  */
 
@@ -17,20 +18,32 @@ import { verificarLicenciaPropiedadIntelectual } from '@/lib/copyrightGuard';
 import { inicializarSeguridadPortapapeles } from '@/lib/antiFraude';
 
 export default function Practica1Page() {
-  // Estados de Identificación Globales del Estudiante (Mapeados con el Core Engine)
   const [estudianteNombre, setEstudianteNombre] = useState('');
   const [estudianteEmail, setEstudianteEmail] = useState('');
   const [estudianteCodigo, setEstudianteCodigo] = useState('');
   const [estudianteDocumento, setEstudianteDocumento] = useState('');
-  const [respuestasDesafios, setRespuestasDesafios] = useState<any>({});
+  
+  // Declaración directa usando la firma indexada nativa que acepta Paso2 y Paso5 simultáneamente
+  const [respuestasDesafios, setRespuestasDesafios] = useState<{
+    virus: string;
+    animal: string;
+    vegetal: string;
+    hongo: string;
+    protozoo: string;
+    [key: string]: string; // Firma de índice para compatibilidad total con Record<string, string>
+  }>({
+    virus: '',
+    animal: '',
+    vegetal: '',
+    hongo: '',
+    protozoo: ''
+  });
 
-  // Control de Flujo de Navegación e IP
   const [pasoActual, setPasoActual] = useState(1);
   const [accesoAutorizado, setAccesoAutorizado] = useState(false);
   const [licenciaValida, setLicenciaValida] = useState<boolean | null>(null);
   const [errorLicencia, setErrorLicencia] = useState('');
 
-  // Identificador de esta práctica específica en Supabase
   const ID_PRACTICA = 'biolab_p1';
 
   useEffect(() => {
@@ -42,18 +55,17 @@ export default function Practica1Page() {
         setErrorLicencia(proteccion.msg);
         return;
       }
-      setLicenciaValida(true);
+      if (licenciaValida === null) setLicenciaValida(true);
     };
 
     validarDerechosAutor();
 
-    // INYECCIÓN DE LA PROTECCIÓN ANTI-COPIAR/PEGAR EN CALIENTE
     const limpiarSeguridad = inicializarSeguridadPortapapeles();
     
     return () => {
       if (limpiarSeguridad) limpiarSeguridad();
     };
-  }, []);
+  }, [licenciaValida]);
 
   if (licenciaValida === false) {
     return (
@@ -82,7 +94,6 @@ export default function Practica1Page() {
     <main className="min-h-screen bg-[#020617] text-slate-100 p-4 md:p-8 font-sans selection:bg-cyan-500/30">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* ENCABEZADO DE NAVEGACIÓN CONTROLADA */}
         <header className="bg-slate-950/40 border border-slate-800/80 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-xs font-mono font-black text-cyan-400 tracking-wider uppercase">Práctica 1: Modelos Celulares y Microscopía</h2>
@@ -111,7 +122,6 @@ export default function Practica1Page() {
           </div>
         </header>
 
-        {/* INYECCIÓN DINÁMICA DE PASOS CON BLINDAJE DE COMPATIBILIDAD */}
         <div className="transition-all duration-300">
           {pasoActual === 1 && (
             <Paso1_Bioseguridad
@@ -119,13 +129,11 @@ export default function Practica1Page() {
               setEstudianteNombre={setEstudianteNombre}
               estudianteEmail={estudianteEmail}
               setEstudianteEmail={setEstudianteEmail}
-              {...{
-                estudianteCodigo,
-                setEstudianteCodigo,
-                estudianteDocumento,
-                setEstudianteDocumento,
-                onAccesoConcedido: () => setAccesoAutorizado(true)
-              } as any}
+              estudianteCodigo={estudianteCodigo}
+              setEstudianteCodigo={setEstudianteCodigo}
+              estudianteDocumento={estudianteDocumento}
+              setEstudianteDocumento={setEstudianteDocumento}
+              onAccesoConcedido={() => setAccesoAutorizado(true)}
             />
           )}
 
@@ -133,8 +141,7 @@ export default function Practica1Page() {
             <Paso2_Fundamentos 
               estudianteNombre={estudianteNombre}
               respuestasDesafios={respuestasDesafios}
-              setRespuestasDesafios={setRespuestasDesafios}
-              {...{} as any}
+              setRespuestasDesafios={setRespuestasDesafios} // Conexión directa y fluida sin casteos
             />
           )}
 
@@ -146,10 +153,7 @@ export default function Practica1Page() {
             <Paso5_Bitacora 
               estudianteNombre={estudianteNombre}
               estudianteEmail={estudianteEmail}
-              {...{
-                estudianteCodigo,
-                idPractica: ID_PRACTICA
-              } as any}
+              respuestasDesafios={respuestasDesafios}
             />
           )}
         </div>
