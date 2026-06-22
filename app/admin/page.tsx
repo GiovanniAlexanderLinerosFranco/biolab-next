@@ -1,10 +1,10 @@
 /**
  * ============================================================================
- * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2.2
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2.4
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
- * * CONSOLA MAESTRA DE CONTROL DE PRÁCTICAS - CORRECCIÓN DE FINALLY
+ * * CONSOLA MAESTRA DE CONTROL DE PRÁCTICAS - FORMATEO SEGURO DE FECHAS TIMESTAMPS
  * ============================================================================
  */
 
@@ -39,7 +39,7 @@ export default function ConsolaAdminPage() {
       setPracticas(data || []);
     } catch (err) {
       console.error("Error al leer configuraciones:", err);
-    } // LINE 42: FIX CORRECTO (finally)
+    }
     finally {
       setCargando(false);
     }
@@ -68,7 +68,7 @@ export default function ConsolaAdminPage() {
     } catch (err) {
       console.error(err);
       setMensajeOperacion('❌ Error de sincronización.');
-    } // LINE 70: FIX CORRECTO (finally)
+    }
     finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
@@ -93,7 +93,7 @@ export default function ConsolaAdminPage() {
     } catch (err) {
       console.error(err);
       setMensajeOperacion('❌ Error al guardar la fecha.');
-    } // LINE 94: FIX CORRECTO (finally)
+    }
     finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
@@ -132,8 +132,9 @@ export default function ConsolaAdminPage() {
           </button>
         </header>
 
+        {/* Notificaciones dinámicas de estado */}
         {mensajeOperacion && (
-          <div className="bg-slate-900 border border-slate-800 text-amber-400 px-4 py-2.5 rounded-xl text-xs font-mono transition-all animate-pulse">
+          <div className="bg-slate-900 border border-slate-800 text-amber-400 px-4 py-2.5 rounded-xl text-xs font-mono transition-all">
             {mensajeOperacion}
           </div>
         )}
@@ -144,51 +145,59 @@ export default function ConsolaAdminPage() {
               No se encontraron entornos cargados en la tabla &apos;ecosistema_configuracion&apos;.
             </div>
           ) : (
-            practicas.map((practica) => (
-              <div 
-                key={practica.id}
-                className={`bg-slate-950/40 border p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-4 items-center transition-all ${
-                  practica.estado ? 'border-cyan-900/40 bg-cyan-950/5' : 'border-slate-900/80 opacity-60'
-                }`}
-              >
-                <div className="lg:col-span-4 space-y-1">
-                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">
-                    {practica.asignatura || 'Ciencias Básicas'}
-                  </span>
-                  <h3 className="text-sm font-bold text-white tracking-tight mt-1">{practica.titulo_practica}</h3>
-                  <p className="text-[10px] font-mono text-slate-500">ID del Sistema: <span className="text-slate-400 font-bold">{practica.id}</span></p>
-                </div>
+            practicas.map((practica) => {
+              // Corrección de formato para compatibilidad con el estándar datetime-local
+              const fechaFormateada = practica.fecha_cierre 
+                ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16) 
+                : '';
 
-                <div className="lg:col-span-3 flex flex-col justify-center">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1.5">Control de Aula:</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => toggleEstadoPractica(practica.id, practica.estado)}
-                      className={`px-4 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase transition-all border ${
-                        practica.estado 
-                          ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-950/30' 
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {practica.estado ? '● ACTIVADO (En Vivo)' : '○ APAGADO (Bloqueado)'}
-                    </button>
+              return (
+                <div 
+                  key={practica.id}
+                  className={`bg-slate-950/40 border p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-4 items-center transition-all ${
+                    practica.estado ? 'border-cyan-900/40 bg-cyan-950/5' : 'border-slate-900/80 opacity-60'
+                  }`}
+                >
+                  <div className="lg:col-span-4 space-y-1">
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">
+                      {practica.asignatura || 'Ciencias Básicas'}
+                    </span>
+                    <h3 className="text-sm font-bold text-white tracking-tight mt-1">{practica.titulo_practica}</h3>
+                    <p className="text-col-span font-mono text-slate-500 text-[10px]">ID del Sistema: <span className="text-slate-400 font-bold">{practica.id}</span></p>
                   </div>
-                </div>
 
-                <div className="lg:col-span-5 flex flex-col justify-center">
-                  <label className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1">
-                    Cierre de Actividad (Bloqueo de Reintentos):
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={practica.fecha_cierre ? practica.fecha_cierre.substring(0, 16) : ''}
-                    onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)}
-                    className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-amber-500 w-full"
-                  />
-                </div>
+                  <div className="lg:col-span-3 flex flex-col justify-center">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1.5">Control de Aula:</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleEstadoPractica(practica.id, practica.estado)}
+                        className={`px-4 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase transition-all border ${
+                          practica.estado 
+                            ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-950/30' 
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {practica.estado ? '● ACTIVADO (En Vivo)' : '○ APAGADO (Bloqueado)'}
+                      </button>
+                    </div>
+                  </div>
 
-              </div>
-            ))
+                  <div className="lg:col-span-5 flex flex-col justify-center">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase font-bold mb-1">
+                      Cierre de Actividad (Bloqueo de Reintentos):
+                    </span>
+                    <input
+                      type="datetime-local"
+                      value={fechaFormateada}
+                      onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-amber-500 w-full"
+                    />
+                  </div>
+
+                </div>
+              );
+            })
           )}
         </div>
 
