@@ -1,10 +1,10 @@
 /**
  * ============================================================================
- * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.2.5
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.3.5
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
- * * CONSOLA MAESTRA - INYECTOR DE EMERGENCIA EN FRONTIER INTEGRADO
+ * * CONSOLA MAESTRA - SISTEMA DE DETECCIÓN ASÍNCRONA CON TIMEOUT
  * ============================================================================
  */
 
@@ -24,23 +24,45 @@ interface PracticaConfig {
 export default function ConsolaAdminPage() {
   const [practicas, setPracticas] = useState<PracticaConfig[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [errorSistema, setErrorSistema] = useState<string | null>(null);
   const [mensajeOperacion, setMensajeOperacion] = useState('');
-  const [inyectando, setInyectando] = useState(false);
 
   const cargarConfiguraciones = async () => {
-    if (!supabase) return;
     try {
-      const { data, error } = await supabase
+      setErrorSistema(null);
+      
+      if (!supabase) {
+        setErrorSistema("Error de Inyección: El cliente de Supabase no se inicializó.");
+        setCargando(false);
+        return;
+      }
+
+      // Consulta a Supabase
+      const selectPromise = supabase
         .from('ecosistema_configuracion')
         .select('*')
         .order('id', { ascending: true });
 
+      // Promesa de Timeout: si pasa 5 segundos, aborta
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Tiempo de espera agotado (Timeout). Supabase no responde.")), 5000)
+      );
+
+      const response = await Promise.race([selectPromise, timeoutPromise]);
+      const { data, error } = response as any;
+
       if (error) throw error;
-      setPracticas(data || []);
-    } catch (err) {
-      console.error("Error al leer configuraciones:", err);
-    }
-    finally {
+
+      if (!data || data.length === 0) {
+        setErrorSistema("Tabla vacía: La tabla existe pero no contiene registros en este entorno.");
+      } else {
+        setPracticas(data);
+      }
+    } catch (err: unknown) {
+      console.error("Error crítico detectado:", err);
+      const errorMensaje = err instanceof Error ? err.message : 'Error desconocido de red o políticas RLS.';
+      setErrorSistema(`Falla de Conexión Central: ${errorMensaje}`);
+    } finally {
       setCargando(false);
     }
   };
@@ -49,50 +71,20 @@ export default function ConsolaAdminPage() {
     cargarConfiguraciones();
   }, []);
 
-  // BOTÓN DE EMERGENCIA: Inyecta las filas directamente usando el cliente interno de la PWA
-  const inicializarTablasDesdeFront = async () => {
+  const toggleEstadoPractica = async (id: string, estadoActual: boolean) => {
     if (!supabase) return;
-    setInyectando(true);
-    setMensajeOperacion('Creando registros de cátedra en la base de datos conectada...');
-    
-    const lotePrácticas = [
-      { id: 'biolab_p1', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Bioseguridad, Diversidad y Microscopía', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p2', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Práctica 2: Reconocimiento de Organelas y Estructuras', estado: true, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p3', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Receptores de Membrana Celular (ABO/Rh)', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p4', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Comunicación Celular y Flujo de Sustancias', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p5', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Índice Mitótico y Ciclo Celular', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p6', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Extracción y Aislamiento de ADN', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p7', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Transcripción y Traducción Génica', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' },
-      { id: 'biolab_p8', asignatura: 'Biología Celular y Molecular', titulo_practica: 'Mutaciones Moleculares y Variabilidad', estado: false, fecha_apertura: new Date().toISOString(), fecha_cierre: '2026-12-31T23:59:59.000Z' }
-    ];
-
+    setMensajeOperacion('Sincronizando con el servidor...');
     try {
       const { error } = await supabase
         .from('ecosistema_configuracion')
-        .upsert(lotePrácticas, { onConflict: 'id' });
+        .update({ estado: !estadoActual })
+        .eq('id', id);
 
-      if (error) throw error;
-      setMensajeOperacion('✓ ¡Ecosistema sincronizado con éxito!');
-      await cargarConfiguraciones();
-} catch (err: unknown) {
-      console.error(err);
-      const errorMensaje = err instanceof Error ? err.message : 'Verifique políticas RLS o conexión';
-      setMensajeOperacion(`❌ Error: ${errorMensaje}`);
-    } finally {
-      setInyectando(false);
-    }
-  };
-
-  const toggleEstadoPractica = async (id: string, estadoActual: boolean) => {
-    if (!supabase) return;
-    setMensajeOperacion('Sincronizando interruptor...');
-    try {
-      const { error } = await supabase.from('ecosistema_configuracion').update({ estado: !estadoActual }).eq('id', id);
       if (error) throw error;
       setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, estado: !estadoActual } : p)));
-      setMensajeOperacion('✓ Interruptor actualizado.');
-    } catch (err) {
-      setMensajeOperacion('❌ Error al cambiar estado.');
+      setMensajeOperacion('✓ Cambio guardado exitosamente.');
+    } catch (err: unknown) {
+      setMensajeOperacion(`❌ Error: No se pudo actualizar el estado.`);
     } finally {
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
@@ -101,18 +93,23 @@ export default function ConsolaAdminPage() {
   const actualizarFechaCierre = async (id: string, nuevaFecha: string) => {
     if (!supabase || !nuevaFecha) return;
     try {
-      const { error } = await supabase.from('ecosistema_configuracion').update({ fecha_cierre: new Date(nuevaFecha).toISOString() }).eq('id', id);
+      const isoFecha = new Date(nuevaFecha).toISOString();
+      const { error } = await supabase
+        .from('ecosistema_configuracion')
+        .update({ fecha_cierre: isoFecha })
+        .eq('id', id);
+
       if (error) throw error;
-      setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, fecha_cierre: nuevaFecha } : p)));
+      setPracticas((prev) => prev.map((p) => (p.id === id ? { ...p, fecha_cierre: isoFecha } : p)));
     } catch (err) {
-      console.error(err);
+      console.error("Error al actualizar marca temporal:", err);
     }
   };
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center font-mono text-xs text-amber-400 animate-pulse">
-        Cargando Consola de Control Docente BioGALF...
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center font-mono text-xs text-amber-500 animate-pulse">
+        [SISTEMA CORE] Estableciendo canal seguro de comunicación con Supabase...
       </div>
     );
   }
@@ -124,63 +121,85 @@ export default function ConsolaAdminPage() {
         <header className="bg-slate-950/60 border border-slate-900 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl backdrop-blur-md">
           <div className="space-y-1">
             <span className="text-[9px] font-mono font-black text-amber-400 tracking-widest uppercase bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded-md">
-              Panel Operador Maestro
+              Control de Infraestructura Maestra
             </span>
             <h1 className="text-xl font-extrabold text-white tracking-tight uppercase">
-              Control de Cátedra e Integridad Académica
+              Consola Central de Cátedra
             </h1>
             <p className="text-xs text-slate-400 font-mono">PhD. Giovanni Alexander Lineros Franco</p>
           </div>
-          <button onClick={() => window.location.href = '/laboratorio/registro'} className="px-4 py-2 border border-slate-800 hover:bg-slate-900 rounded-xl text-xs font-mono text-slate-400 transition-all">
-            ← Salir
+          <button 
+            onClick={() => window.location.href = '/laboratorio/registro'} 
+            className="px-4 py-2 border border-slate-800 hover:bg-slate-900 rounded-xl text-xs font-mono text-slate-400 hover:text-white transition-all shadow-sm"
+          >
+            ← Salir al Registro
           </button>
         </header>
 
         {mensajeOperacion && (
-          <div className="bg-slate-900 border border-slate-800 text-amber-400 px-4 py-2.5 rounded-xl text-xs font-mono animate-pulse">
+          <div className="bg-slate-900 border border-slate-800 text-amber-400 px-4 py-2.5 rounded-xl text-xs font-mono">
             {mensajeOperacion}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4">
-          {practicas.length === 0 ? (
-            <div className="bg-slate-950/40 border border-slate-900 p-8 rounded-2xl text-center space-y-4">
-              <p className="text-xs font-mono text-slate-500">
-                La base de datos conectada a este Vercel no contiene los registros iniciales.
-              </p>
-              {/* ACCIÓN CORRECTIVA DIRECTA */}
-              <button
-                type="button"
-                disabled={inyectando}
-                onClick={inicializarTablasDesdeFront}
-                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-mono text-xs font-bold rounded-xl border border-amber-400/20 transition-all shadow-lg uppercase tracking-wider"
-              >
-                {inyectando ? 'Sincronizando...' : '⚡ Inicializar Entornos de Práctica'}
-              </button>
+        {errorSistema ? (
+          <div className="bg-rose-950/20 border border-rose-500/30 p-6 rounded-2xl space-y-3">
+            <h3 className="text-rose-400 font-bold font-mono text-xs uppercase tracking-wider">
+              🛑 Alerta de Sincronización de Base de Datos
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed font-mono">
+              {errorSistema}
+            </p>
+            <div className="text-[11px] text-slate-500 border-t border-rose-950/40 pt-3">
+              Solución: Si el error persiste tras validar las variables en Vercel, revise si la tabla requiere desactivar las políticas de seguridad Row Level Security (RLS) para lectura pública.
             </div>
-          ) : (
-            practicas.map((practica) => {
-              const fechaFormateada = practica.fecha_cierre ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16) : '';
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {practicas.map((practica) => {
+              const fechaFormateada = practica.fecha_cierre 
+                ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16) 
+                : '';
+
               return (
-                <div key={practica.id} className={`bg-slate-950/40 border p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-4 items-center transition-all ${practica.estado ? 'border-cyan-900/40 bg-cyan-950/5' : 'border-slate-900/80 opacity-60'}`}>
+                <div 
+                  key={practica.id} 
+                  className={`bg-slate-950/40 border p-5 rounded-2xl grid grid-cols-1 lg:grid-cols-12 gap-4 items-center transition-all ${
+                    practica.estado ? 'border-cyan-900/40 bg-cyan-950/5' : 'border-slate-900/80 opacity-60'
+                  }`}
+                >
                   <div className="lg:col-span-4 space-y-1">
-                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">{practica.asignatura}</span>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">
+                      {practica.asignatura}
+                    </span>
                     <h3 className="text-sm font-bold text-white tracking-tight mt-1">{practica.titulo_practica}</h3>
                     <p className="font-mono text-slate-500 text-[10px]">ID: <span className="text-slate-400 font-bold">{practica.id}</span></p>
                   </div>
+                  
                   <div className="lg:col-span-3 flex flex-col justify-center">
-                    <button onClick={() => toggleEstadoPractica(practica.id, practica.estado)} className={`px-4 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase transition-all border ${practica.estado ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                    <button 
+                      onClick={() => toggleEstadoPractica(practica.id, practica.estado)} 
+                      className={`px-4 py-1.5 rounded-xl text-[11px] font-mono font-bold uppercase transition-all border ${
+                        practica.estado ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'
+                      }`}
+                    >
                       {practica.estado ? '● ACTIVADO' : '○ APAGADO'}
                     </button>
                   </div>
+
                   <div className="lg:col-span-5 flex flex-col justify-center">
-                    <input type="datetime-local" value={fechaFormateada} onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)} className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full" />
+                    <input 
+                      type="datetime-local" 
+                      value={fechaFormateada} 
+                      onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)} 
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-cyan-500" 
+                    />
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </main>
   );
