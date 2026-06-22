@@ -190,7 +190,7 @@ export default function ConsolaAdminPage() {
                   <div className="lg:col-span-5 flex flex-col justify-center">
                     <input 
                       type="datetime-local" 
-                      value={fechaFormateada} 
+                     value={fechaFormateada} 
                       onChange={(e) => actualizarFechaCierre(practica.id, e.target.value)} 
                       className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-cyan-500" 
                     />
