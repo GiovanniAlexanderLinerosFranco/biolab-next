@@ -33,7 +33,7 @@ const PRACTICAS = [
 export default function PanelLaboratorios() {
   const [estadosDB, setEstadosDB] = useState<Record<string, EstadoPractica>>({});
   const [cargando, setCargando] = useState(true);
-  const [practicaSeleccionadaQR, setPracticaSeleccionadaQR] = useState('biolab_p1');
+  const [practicaSeleccionadaQR, setPracticaSeleccionadaQR] = useState('biolab_p2');
 
   useEffect(() => {
     const consultarInterruptores = async () => {

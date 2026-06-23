@@ -47,7 +47,7 @@ export default function Practica2Histologia() {
       if (!proteccion.autorizado) {
         setLicenciaValida(false);
         alert(`SISTEMA BLOQUEADO: ${proteccion.msg}`);
-        router.push('/laboratorio/registro');
+        router.push('/laboratorio/registro?practica=biolab_p2');
         return;
       }
       setLicenciaValida(true);
@@ -59,7 +59,23 @@ export default function Practica2Histologia() {
     const sesionGuardada = localStorage.getItem('biolab_estudiante_sesion');
     if (sesionGuardada) {
       try {
-        const datos = JSON.parse(sesionGuardada);
+        const datos = JSON.parse(sesionGuardada) as {
+          nombre?: string;
+          email?: string;
+          codigo?: string;
+          practicaId?: string;
+          rol?: string;
+        };
+
+        const esAdminOperador = datos.email?.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co' || datos.rol === 'ADMIN';
+        const practicaValida = datos.practicaId === ID_PRACTICA;
+
+        if (!esAdminOperador && !practicaValida) {
+          alert('Sesión inválida para esta práctica. Registre su ingreso en el QR de la Práctica 2.');
+          router.push('/laboratorio/registro?practica=biolab_p2');
+          return;
+        }
+
         setEstudianteNombre(datos.nombre || '');
         setEstudianteEmail(datos.email || '');
         setEstudianteCodigo(datos.codigo || '');
@@ -69,7 +85,7 @@ export default function Practica2Histologia() {
     } else {
       // Si el vivo intenta entrar directo saltándose la asistencia, lo mandamos de vuelta
       alert("Acceso Restringido: Debe registrar su asistencia antes de iniciar el simulador.");
-      router.push('/laboratorio/registro');
+      router.push('/laboratorio/registro?practica=biolab_p2');
     }
   }, [router]);
 

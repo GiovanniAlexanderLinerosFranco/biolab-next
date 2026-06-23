@@ -104,24 +104,45 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const tablaBitacoraObjetivo = practicaId === 'biolab_p2' ? 'bitacoras_practica_2' : 'bitacoras_practica_1';
+  const tokenAcceso = body.token?.trim() || 'Directo';
 
-  const { error: errorBitacora } = await supabaseAdmin.from(tablaBitacoraObjetivo).insert([
-    {
-      estudiante_nombre: nombre,
-      estudiante_email: email,
-      respuestas_desafios: {},
-      tabla_muestras: {},
-      analis_contraste: `Acceso concedido vía QR Dinámico. Token: ${body.token?.trim() || 'Directo'}`,
-      conclusiones_preguntas: {},
-    },
-  ]);
+  if (practicaId === 'biolab_p1') {
+    const { error: errorBitacoraP1 } = await supabaseAdmin.from('bitacoras_practica_1').insert([
+      {
+        estudiante_nombre: nombre,
+        estudiante_email: email,
+        respuestas_desafios: {},
+        tabla_muestras: {},
+        analisis_contraste: `Acceso concedido vía QR Dinámico. Token: ${tokenAcceso}`,
+        conclusiones_preguntas: {},
+      },
+    ]);
 
-  if (errorBitacora) {
-    return NextResponse.json(
-      { ok: false, message: errorBitacora.message },
-      { status: 500 }
-    );
+    if (errorBitacoraP1) {
+      return NextResponse.json(
+        { ok: false, message: errorBitacoraP1.message },
+        { status: 500 }
+      );
+    }
+  }
+
+  if (practicaId === 'biolab_p2') {
+    const { error: errorBitacoraP2 } = await supabaseAdmin.from('bitacoras_practica_2').insert([
+      {
+        estudiante_nombre: nombre,
+        estudiante_email: email,
+        respuestas_desafios: {},
+        tabla_tejidos: {},
+        analisis_diagnostico: `Acceso concedido vía QR Dinámico. Token: ${tokenAcceso}`,
+      },
+    ]);
+
+    if (errorBitacoraP2) {
+      return NextResponse.json(
+        { ok: false, message: errorBitacoraP2.message },
+        { status: 500 }
+      );
+    }
   }
 
   return NextResponse.json({ ok: true });

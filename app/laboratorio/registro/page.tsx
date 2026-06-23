@@ -103,6 +103,13 @@ function RegistroFormContent() {
 
     // Bypass de desarrollador: acceso directo sin validaciones adicionales
     if (email.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co') {
+      localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
+        nombre: 'Docente Administrador',
+        email: email.trim(),
+        codigo: 'ADMIN',
+        practicaId: idPracticaUrl,
+        rol: 'ADMIN',
+      }));
       setRegistroExitoso(true);
       setTimeout(() => router.push(rutaPracticaDinamica), 800);
       return;
@@ -172,7 +179,9 @@ function RegistroFormContent() {
       localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
         nombre: nombre.trim(),
         email: email.trim(),
-        codigo: codigo.trim() || documento.trim()
+        codigo: codigo.trim() || documento.trim(),
+        practicaId: idPracticaUrl,
+        rol: 'ESTUDIANTE',
       }));
 
       setRegistroExitoso(true);
