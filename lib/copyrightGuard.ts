@@ -16,6 +16,23 @@ export const verificarLicenciaPropiedadIntelectual = async (idAsignatura: string
     // 1. CAPTURAR EL DOMINIO ACTUAL EN CALIENTE
     const dominioCliente = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
 
+    // 1.1 BYPASS DOCENTE EN PRODUCCION: habilita revisión operativa con sesión administrativa
+    if (typeof window !== 'undefined') {
+      const sesionRaw = localStorage.getItem('biolab_estudiante_sesion');
+      if (sesionRaw) {
+        try {
+          const sesion = JSON.parse(sesionRaw) as { email?: string; rol?: string };
+          const correo = sesion.email?.trim().toLowerCase() || '';
+          const esAdmin = sesion.rol === 'ADMIN' || correo === 'giovanni.lineros@ustabuca.edu.co';
+          if (esAdmin) {
+            return { autorizado: true, msg: "Operador docente autorizado en modo revisión." };
+          }
+        } catch {
+          // Si la sesión está corrupta, se ignora y continúa la validación estándar.
+        }
+      }
+    }
+
     // 2. BYPASS DE SEGURIDAD PARA OPERADOR (TÚ): Permitir desarrollo en Localhost y GitHub Codespaces
     if (
       dominioCliente === 'localhost' || 
