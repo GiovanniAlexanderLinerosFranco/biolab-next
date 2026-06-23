@@ -18,6 +18,7 @@ function RegistroFormContent() {
   
   const idPracticaUrl = searchParams.get('practica') || 'biolab_p1';
   const tokenUrl = searchParams.get('token') || '';
+  const rutaPracticaDinamica = `/laboratorio/practica/${encodeURIComponent(idPracticaUrl)}`;
 
   // Estados del Formulario Estudiante
   const [nombre, setNombre] = useState('');
@@ -92,7 +93,7 @@ function RegistroFormContent() {
     // Bypass de desarrollador: acceso directo sin validaciones adicionales
     if (email.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co') {
       setRegistroExitoso(true);
-      setTimeout(() => router.push('/admin'), 800);
+      setTimeout(() => router.push(rutaPracticaDinamica), 800);
       return;
     }
 
