@@ -16,6 +16,33 @@ export const verificarLicenciaPropiedadIntelectual = async (idAsignatura: string
     // 1. CAPTURAR EL DOMINIO ACTUAL EN CALIENTE
     const dominioCliente = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
 
+    if (typeof window !== 'undefined') {
+      const sesionRaw = localStorage.getItem('biolab_estudiante_sesion');
+      if (sesionRaw) {
+        try {
+          const sesion = JSON.parse(sesionRaw) as {
+            practicaId?: string;
+            rol?: string;
+            expiraEn?: string;
+            origen?: string;
+          };
+
+          const esModoPrueba =
+            sesion.rol === 'DEVELOPER_TEST' &&
+            sesion.practicaId === idAsignatura &&
+            sesion.origen === 'admin-dashboard' &&
+            typeof sesion.expiraEn === 'string' &&
+            new Date(sesion.expiraEn).getTime() > Date.now();
+
+          if (esModoPrueba) {
+            return { autorizado: true, msg: 'Modo prueba de desarrollador habilitado desde dashboard.' };
+          }
+        } catch {
+          // Si la sesión temporal es inválida, continúa la validación normal.
+        }
+      }
+    }
+
     // 2. BYPASS DE SEGURIDAD PARA OPERADOR (TÚ): Permitir desarrollo en Localhost y GitHub Codespaces
     if (
       dominioCliente === 'localhost' || 

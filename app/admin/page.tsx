@@ -27,6 +27,25 @@ export default function ConsolaAdminPage() {
   const [mensajeOperacion, setMensajeOperacion] = useState('');
   const [draftFechas, setDraftFechas] = useState<Record<string, string>>({});
 
+  const activarModoPrueba = (practica: PracticaConfig) => {
+    const expiraEn = new Date(Date.now() + 45 * 60 * 1000).toISOString();
+    const tituloPractica = practica.id === 'biolab_p2' ? 'Práctica 2: Histología' : practica.titulo_practica;
+
+    localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
+      nombre: 'Docente en modo prueba',
+      email: 'giovanni.lineros@ustabuca.edu.co',
+      codigo: 'DEV-TEST',
+      practicaId: practica.id,
+      rol: 'DEVELOPER_TEST',
+      expiraEn,
+      origen: 'admin-dashboard',
+      tituloPractica,
+    }));
+
+    setMensajeOperacion(`✓ Modo prueba habilitado para ${tituloPractica} hasta ${new Date(expiraEn).toLocaleTimeString('es-CO')}.`);
+    window.location.href = `/laboratorio/practica/${encodeURIComponent(practica.id)}`;
+  };
+
   const formatearParaInputLocal = (fechaIso: string) => {
     if (!fechaIso) return '';
     const fecha = new Date(fechaIso);
@@ -236,6 +255,12 @@ export default function ConsolaAdminPage() {
                       {practica.estado ? '● ACTIVADO' : '○ APAGADO'}
                     </button>
                     <div className="mt-2 flex flex-col gap-1.5">
+                      <button
+                        onClick={() => activarModoPrueba(practica)}
+                        className="text-center px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase border border-teal-800/60 text-teal-300 hover:bg-teal-950/30 transition-all"
+                      >
+                        Probar práctica
+                      </button>
                       <a
                         href={rutaRegistro}
                         target="_blank"
