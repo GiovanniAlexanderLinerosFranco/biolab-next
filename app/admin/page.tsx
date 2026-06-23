@@ -26,6 +26,15 @@ export default function ConsolaAdminPage() {
   const [errorSistema, setErrorSistema] = useState<string | null>(null);
   const [mensajeOperacion, setMensajeOperacion] = useState('');
 
+  const formatearParaInputLocal = (fechaIso: string) => {
+    if (!fechaIso) return '';
+    const fecha = new Date(fechaIso);
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    const tzOffsetMs = fecha.getTimezoneOffset() * 60000;
+    return new Date(fecha.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+  };
+
   const cargarConfiguraciones = async () => {
     try {
       setErrorSistema(null);
@@ -113,6 +122,9 @@ export default function ConsolaAdminPage() {
       );
     } catch (err) {
       console.error(`Error al actualizar ${campo}:`, err);
+      const errorMensaje = err instanceof Error ? err.message : `No se pudo actualizar ${campo}.`;
+      setMensajeOperacion(`❌ Error: ${errorMensaje}`);
+      setTimeout(() => setMensajeOperacion(''), 3000);
     }
   };
 
@@ -167,12 +179,10 @@ export default function ConsolaAdminPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {practicas.map((practica) => {
-              const fechaAperturaFormateada = practica.fecha_apertura
-                ? practica.fecha_apertura.replace(' ', 'T').substring(0, 16)
-                : '';
-              const fechaCierreFormateada = practica.fecha_cierre
-                ? practica.fecha_cierre.replace(' ', 'T').substring(0, 16)
-                : '';
+              const fechaAperturaFormateada = formatearParaInputLocal(practica.fecha_apertura);
+              const fechaCierreFormateada = formatearParaInputLocal(practica.fecha_cierre);
+              const rutaRegistro = `/laboratorio/registro?practica=${encodeURIComponent(practica.id)}`;
+              const rutaRevision = `/laboratorio/practica/${encodeURIComponent(practica.id)}`;
 
               return (
                 <div 
@@ -198,6 +208,24 @@ export default function ConsolaAdminPage() {
                     >
                       {practica.estado ? '● ACTIVADO' : '○ APAGADO'}
                     </button>
+                    <div className="mt-2 flex flex-col gap-1.5">
+                      <a
+                        href={rutaRegistro}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-center px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase border border-cyan-800/60 text-cyan-300 hover:bg-cyan-950/30 transition-all"
+                      >
+                        Abrir enlace QR
+                      </a>
+                      <a
+                        href={rutaRevision}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-center px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase border border-amber-800/60 text-amber-300 hover:bg-amber-950/30 transition-all"
+                      >
+                        Revisar práctica
+                      </a>
+                    </div>
                   </div>
 
                   <div className="lg:col-span-5 flex flex-col gap-2 justify-center">

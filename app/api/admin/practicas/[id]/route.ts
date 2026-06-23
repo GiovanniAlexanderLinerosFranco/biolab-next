@@ -49,6 +49,41 @@ export async function PATCH(
     );
   }
 
+  if (updateData.fecha_apertura || updateData.fecha_cierre) {
+    const { data: actual, error: errorActual } = await supabaseAdmin
+      .from('ecosistema_configuracion')
+      .select('fecha_apertura, fecha_cierre')
+      .eq('id', id)
+      .single();
+
+    if (errorActual || !actual) {
+      return NextResponse.json(
+        { ok: false, message: errorActual?.message || 'No se pudo validar la práctica objetivo.' },
+        { status: 404 }
+      );
+    }
+
+    const fechaAperturaFinal = updateData.fecha_apertura ?? actual.fecha_apertura;
+    const fechaCierreFinal = updateData.fecha_cierre ?? actual.fecha_cierre;
+
+    const apertura = new Date(fechaAperturaFinal);
+    const cierre = new Date(fechaCierreFinal);
+
+    if (Number.isNaN(apertura.getTime()) || Number.isNaN(cierre.getTime())) {
+      return NextResponse.json(
+        { ok: false, message: 'Las fechas de apertura/cierre no tienen un formato válido.' },
+        { status: 400 }
+      );
+    }
+
+    if (apertura >= cierre) {
+      return NextResponse.json(
+        { ok: false, message: 'La fecha de apertura debe ser menor que la fecha de cierre.' },
+        { status: 400 }
+      );
+    }
+  }
+
   const { data, error } = await supabaseAdmin
     .from('ecosistema_configuracion')
     .update(updateData)

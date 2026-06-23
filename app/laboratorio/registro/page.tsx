@@ -29,7 +29,12 @@ function RegistroFormContent() {
 
   // Estados de Control Interno
   const [isConnecting, setIsConnecting] = useState(false);
-  const [estadoPractica, setEstadoPractica] = useState<{ activa: boolean; titulo: string; checked: boolean }>({ activa: false, titulo: '', checked: false });
+  const [estadoPractica, setEstadoPractica] = useState<{
+    activa: boolean;
+    titulo: string;
+    checked: boolean;
+    motivoBloqueo: string;
+  }>({ activa: false, titulo: '', checked: false, motivoBloqueo: '' });
   const [mensajeAlerta, setMensajeAlerta] = useState('');
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [tipoAcceso, setTipoAcceso] = useState<'ESTUDIANTE' | 'ADMIN'>('ESTUDIANTE');
@@ -54,22 +59,28 @@ function RegistroFormContent() {
         });
         const payload = (await response.json()) as {
           ok: boolean;
-          data?: { estado: boolean; titulo_practica: string };
+          data?: {
+            estado: boolean;
+            titulo_practica: string;
+            acceso_habilitado?: boolean;
+            motivo_bloqueo?: string;
+          };
         };
 
         if (!response.ok || !payload.ok || !payload.data) {
-          setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true });
+          setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true, motivoBloqueo: 'La práctica no existe o no pudo ser consultada.' });
           return;
         }
 
         setEstadoPractica({
-          activa: payload.data.estado,
+          activa: payload.data.acceso_habilitado === true,
           titulo: payload.data.titulo_practica,
-          checked: true
+          checked: true,
+          motivoBloqueo: payload.data.motivo_bloqueo || ''
         });
       } catch (err) {
         console.error("Error consultando configuración remota:", err);
-        setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true });
+        setEstadoPractica({ activa: false, titulo: 'Práctica No Identificada', checked: true, motivoBloqueo: 'Error de red al validar estado de la práctica.' });
       }
     };
 
@@ -122,7 +133,7 @@ function RegistroFormContent() {
     }
 
     if (!estadoPractica.activa) {
-      setMensajeAlerta("⚠️ Control de Cátedra: La práctica seleccionada no se encuentra activa en este momento. Por favor, solicite al docente la apertura del entorno.");
+      setMensajeAlerta(`⚠️ Control de Cátedra: ${estadoPractica.motivoBloqueo || 'La práctica seleccionada no se encuentra activa en este momento. Por favor, solicite al docente la apertura del entorno.'}`);
       setIsConnecting(false);
       return;
     }
@@ -167,8 +178,7 @@ function RegistroFormContent() {
       setRegistroExitoso(true);
       
       setTimeout(() => {
-        const rutaDestino = idPracticaUrl === 'biolab_p2' ? '/laboratorio/practica2' : '/laboratorio/practica1';
-        router.push(rutaDestino);
+        router.push(rutaPracticaDinamica);
       }, 2000);
 
 } catch (error) {

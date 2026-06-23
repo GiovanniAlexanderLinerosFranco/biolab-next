@@ -28,7 +28,7 @@ export const verificarLicenciaPropiedadIntelectual = async (idAsignatura: string
     // 3. CONTROL DE LICENCIA COMERCIAL ESTRICTO PARA PRODUCCIÓN (EMPRESAS / UNIVERSIDADES)
     const { data: licencia, error } = await supabase
       .from('ecosistema_configuracion')
-      .select('estado, fecha_cierre')
+      .select('estado, fecha_apertura, fecha_cierre')
       .eq('id', idAsignatura)
       .single();
 
@@ -37,16 +37,33 @@ export const verificarLicenciaPropiedadIntelectual = async (idAsignatura: string
     }
 
     const ahora = new Date();
-    if (ahora > new Date(licencia.fecha_cierre) || !licencia.estado) {
+    const apertura = new Date(licencia.fecha_apertura);
+    const cierre = new Date(licencia.fecha_cierre);
+
+    if (!licencia.estado) {
       return { 
         autorizado: false, 
-        msg: "Licencia Expirada: El periodo de uso autorizado para este software ha caducado. Contacte al soporte de BioGALF Home Health S.A.S." 
+        msg: "Licencia no habilitada: La práctica está desactivada por cátedra." 
+      };
+    }
+
+    if (Number.isNaN(apertura.getTime()) || Number.isNaN(cierre.getTime())) {
+      return {
+        autorizado: false,
+        msg: "Licencia inválida: Ventana horaria de apertura/cierre no configurada correctamente.",
+      };
+    }
+
+    if (ahora < apertura || ahora > cierre) {
+      return {
+        autorizado: false,
+        msg: "Licencia fuera de horario: La práctica está fuera de la ventana temporal autorizada.",
       };
     }
 
     return { autorizado: true, msg: "Licencia de propiedad intelectual verificada correctamente." };
 
-  } catch (err) {
+  } catch {
     return { autorizado: false, msg: "Falla de autenticación con el servidor de derechos de autor." };
   }
 };

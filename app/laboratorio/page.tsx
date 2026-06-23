@@ -11,40 +11,76 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { QRCodeSVG } from 'qrcode.react';
-import { supabase } from '@/lib/supabaseClient';
+import DynamicQRGenerator from '@/components/simulators/DynamicQRGenerator';
+
+type EstadoPractica = {
+  estado: boolean;
+  acceso_habilitado: boolean;
+  motivo_bloqueo: string;
+};
+
+const PRACTICAS = [
+  { id: 'biolab_p1', numero: '01', titulo: 'Bioseguridad, Diversidad y Microscopía' },
+  { id: 'biolab_p2', numero: '02', titulo: 'Entre Células y Capas: Tejidos Humanos' },
+  { id: 'biolab_p3', numero: '03', titulo: 'Receptores de Membrana Celular (ABO/Rh)' },
+  { id: 'biolab_p4', numero: '04', titulo: 'Comunicación Celular y Flujo de Sustancias' },
+  { id: 'biolab_p5', numero: '05', titulo: 'Índice Mitótico y Ciclo Celular' },
+  { id: 'biolab_p6', numero: '06', titulo: 'Extracción y Aislamiento de ADN' },
+  { id: 'biolab_p7', numero: '07', titulo: 'Transcripción y Traducción Génica' },
+  { id: 'biolab_p8', numero: '08', titulo: 'Mutaciones Moleculares y Variabilidad' },
+];
 
 export default function PanelLaboratorios() {
-  const urlRegistroAsistencia = "https://biolab-next.vercel.app/laboratorio/registro";
-  const [estadosDB, setEstadosDB] = useState<Record<string, boolean>>({});
+  const [estadosDB, setEstadosDB] = useState<Record<string, EstadoPractica>>({});
   const [cargando, setCargando] = useState(true);
-
-  const practicas = [
-    { id: "biolab_p1", numero: "01", titulo: "Bioseguridad, Diversidad y Microscopía", ruta: "/laboratorio/practica1" },
-    { id: "biolab_p2", numero: "02", titulo: "Entre Células y Capas: Tejidos Humanos", ruta: "/laboratorio/practica2" },
-    { id: "biolab_p3", numero: "03", titulo: "Receptores de Membrana Celular (ABO/Rh)", ruta: "/laboratorio/practica3" },
-    { id: "biolab_p4", numero: "04", titulo: "Comunicación Celular y Flujo de Sustancias", ruta: "/laboratorio/practica4" },
-    { id: "biolab_p5", numero: "05", titulo: "Índice Mitótico y Ciclo Celular", ruta: "/laboratorio/practica5" },
-    { id: "biolab_p6", numero: "06", titulo: "Extracción y Aislamiento de ADN", ruta: "/laboratorio/practica6" },
-    { id: "biolab_p7", numero: "07", titulo: "Transcripción y Traducción Génica", ruta: "/laboratorio/practica7" },
-    { id: "biolab_p8", numero: "08", titulo: "Mutaciones Moleculares y Variabilidad", ruta: "/laboratorio/practica8" }
-  ];
+  const [practicaSeleccionadaQR, setPracticaSeleccionadaQR] = useState('biolab_p1');
 
   useEffect(() => {
     const consultarInterruptores = async () => {
-      if (!supabase) return;
       try {
-        const { data, error } = await supabase
-          .from('ecosistema_configuracion')
-          .select('id, estado');
+        const resultados = await Promise.all(
+          PRACTICAS.map(async (practica) => {
+            const response = await fetch(`/api/registro/practica/${practica.id}`, {
+              method: 'GET',
+              cache: 'no-store',
+            });
 
-        if (!error && data) {
-          const mapaEstados = data.reduce((acc, current) => {
-            acc[current.id] = current.estado;
-            return acc;
-          }, {} as Record<string, boolean>);
-          setEstadosDB(mapaEstados);
-        }
+            if (!response.ok) {
+              return [
+                practica.id,
+                {
+                  estado: false,
+                  acceso_habilitado: false,
+                  motivo_bloqueo: 'No se pudo consultar la configuración de la práctica.',
+                },
+              ] as const;
+            }
+
+            const payload = (await response.json()) as {
+              ok: boolean;
+              data?: {
+                estado: boolean;
+                acceso_habilitado: boolean;
+                motivo_bloqueo?: string;
+              };
+            };
+
+            const estado = payload.data?.estado ?? false;
+            const acceso_habilitado = payload.data?.acceso_habilitado ?? false;
+            const motivo_bloqueo = payload.data?.motivo_bloqueo ?? '';
+
+            return [
+              practica.id,
+              {
+                estado,
+                acceso_habilitado,
+                motivo_bloqueo,
+              },
+            ] as const;
+          })
+        );
+
+        setEstadosDB(Object.fromEntries(resultados));
       } catch (err) {
         console.error("Error al consultar interruptores:", err);
       } finally {
@@ -94,28 +130,36 @@ export default function PanelLaboratorios() {
       <p className="text-xs text-slate-200 leading-relaxed max-w-xl font-medium drop-shadow-md">
         Proyecte este panel en el aula. Los alumnos deben validar su identidad institucional antes de iniciar los desafíos interactivos programados para la sesión.
       </p>
-      <div className="text-[11px] font-mono text-cyan-300 font-bold break-all select-all pt-1 drop-shadow-md">
-        Portal de acceso: {urlRegistroAsistencia}
+      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center pt-1">
+        <label className="text-[10px] text-slate-300 font-mono font-bold uppercase tracking-wider">Práctica QR:</label>
+        <select
+          value={practicaSeleccionadaQR}
+          onChange={(e) => setPracticaSeleccionadaQR(e.target.value)}
+          className="bg-slate-950/80 border border-cyan-900/50 rounded-lg px-2.5 py-1.5 text-[11px] text-cyan-300 font-mono"
+        >
+          {PRACTICAS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.numero} - {p.id}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
     
-    <div className="bg-white p-3.5 rounded-2xl shadow-2xl border border-slate-200 flex items-center justify-center shrink-0">
-      <QRCodeSVG 
-        value={urlRegistroAsistencia} 
-        size={130}
-        bgColor="#ffffff"
-        fgColor="#020617" 
-        level="H" 
-        includeMargin={false}
-      />
+    <div className="shrink-0">
+      <DynamicQRGenerator idPracticaActual={practicaSeleccionadaQR} />
     </div>
   </div>
 </section>
 
         {/* GRILLA REGULADA POR TU BASE DE DATOS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {practicas.map((p) => {
-            const estaActivaEnDB = estadosDB[p.id] === true;
+          {PRACTICAS.map((p) => {
+            const estadoPractica = estadosDB[p.id];
+            const estaActivaEnDB = estadoPractica?.acceso_habilitado === true;
+            const estaEncendida = estadoPractica?.estado === true;
+            const motivoBloqueo = estadoPractica?.motivo_bloqueo || 'Acceso restringido por configuración docente.';
+            const hrefRegistro = `/laboratorio/registro?practica=${encodeURIComponent(p.id)}`;
 
             return (
               <div 
@@ -131,9 +175,11 @@ export default function PanelLaboratorios() {
                   <span className={`text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
                     estaActivaEnDB 
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse' 
+                      : estaEncendida
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                       : 'bg-slate-800 text-slate-500 border-slate-700'
                   }`}>
-                    {estaActivaEnDB ? "ACTIVA EN VIVO" : "BLOQUEADO"}
+                    {estaActivaEnDB ? "ACTIVA EN VIVO" : estaEncendida ? 'FUERA DE HORARIO' : "BLOQUEADO"}
                   </span>
                 </div>
                 
@@ -143,14 +189,17 @@ export default function PanelLaboratorios() {
 
                 {estaActivaEnDB ? (
                   <Link 
-                    href={p.ruta} 
+                    href={hrefRegistro}
                     className="w-full text-center py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg border border-cyan-400/30"
                   >
-                    INGRESAR A LA EXPERIENCIA
+                    REGISTRAR E INGRESAR
                   </Link>
                 ) : (
-                  <div className="w-full text-center py-2 bg-slate-950/50 border border-slate-900 text-slate-600 font-mono text-[10px] font-bold uppercase tracking-widest rounded-xl cursor-not-allowed">
-                    ACCESO RESTRINGIDO
+                  <div className="space-y-2">
+                    <div className="w-full text-center py-2 bg-slate-950/50 border border-slate-900 text-slate-600 font-mono text-[10px] font-bold uppercase tracking-widest rounded-xl cursor-not-allowed">
+                      ACCESO RESTRINGIDO
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-mono leading-relaxed">{cargando ? 'Sincronizando estado...' : motivoBloqueo}</p>
                   </div>
                 )}
               </div>
