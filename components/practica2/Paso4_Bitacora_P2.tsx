@@ -38,6 +38,10 @@ export default function Paso4_Bitacora_P2({
       alert("Por favor, complete los campos diagnósticos mínimos de la bitácora.");
       return;
     }
+    if (analisisDiagnostico.trim().length < 30) {
+      alert("La justificación científica debe contener al menos 30 caracteres.");
+      return;
+    }
 
     // SALVAGUARDA DE SEGURIDAD EXIGIDA POR TYPESCRIPT
     if (!isSupabaseConfigured || !supabase) {
@@ -56,17 +60,23 @@ export default function Paso4_Bitacora_P2({
     
     const notaCalculada = Number((1.0 + (aciertos * 1.0)).toFixed(1));
 
+    // CONSOLIDACIÓN JSON PARA LA COLUMNA 'CONTENIDO' DEL ESQUEMA UNIFICADO
+    const contenidoPayload = JSON.stringify({
+      estudiante_email: estudianteEmail,
+      respuestas_desafios: respuestasDesafios,
+      tabla_tejidos: tablaTejidos,
+      analisis_diagnostico: analisisDiagnostico,
+      calificacion: notaCalculada
+    });
+
     try {
       const { error } = await supabase
-        .from('bitacoras_practica_2')
+        .from('bitacoras') // <-- Cambiado a la tabla real del esquema SQL
         .insert([
           {
+            practica_id: 2, // <-- Forzado a 2 para identificar Histología
             estudiante_nombre: estudianteNombre,
-            estudiante_email: estudianteEmail,
-            respuestas_desafios: respuestasDesafios,
-            tabla_tejidos: tablaTejidos,
-            analisis_diagnostico: analisisDiagnostico,
-            calificacion: notaCalculada
+            contenido: contenidoPayload // <-- Empaquetado completo seguro para la base de datos
           }
         ]);
 
