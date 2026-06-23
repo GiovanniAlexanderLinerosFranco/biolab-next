@@ -30,10 +30,10 @@ export default function Paso4_Bitacora_P2({
   };
 
   const enviarReporteFinal = async () => {
-    if (!estudianteNombre || !estudianteEmail) {
-      alert("Por favor, active su sesión en la Estación 01 antes de enviar.");
-      return;
-    }
+    // SALVAGUARDA DEFENSIVA: Recuperación de identidad desde almacenamiento local si falla el estado de la PWA
+    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@ustabuca.edu.co';
+    const nombreEfectivo = estudianteNombre || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_nombre') : null) || 'Estudiante Anonimo';
+
     if (!tablaTejidos.M1.tejido || !tablaTejidos.M2.tejido || !analisisDiagnostico.trim()) {
       alert("Por favor, complete los campos diagnósticos mínimos de la bitácora.");
       return;
@@ -62,7 +62,7 @@ export default function Paso4_Bitacora_P2({
 
     // CONSOLIDACIÓN JSON PARA LA COLUMNA 'CONTENIDO' DEL ESQUEMA UNIFICADO
     const contenidoPayload = JSON.stringify({
-      estudiante_email: estudianteEmail,
+      estudiante_email: emailEfectivo,
       respuestas_desafios: respuestasDesafios,
       tabla_tejidos: tablaTejidos,
       analisis_diagnostico: analisisDiagnostico,
@@ -71,11 +71,11 @@ export default function Paso4_Bitacora_P2({
 
     try {
       const { error } = await supabase
-        .from('bitacoras') // <-- Cambiado a la tabla real del esquema SQL
+        .from('bitacoras') // <-- Tabla real y unificada del esquema SQL
         .insert([
           {
-            practica_id: 2, // <-- Forzado a 2 para identificar Histología
-            estudiante_nombre: estudianteNombre,
+            practica_id: 2, // <-- Identificador numérico de Histología
+            estudiante_nombre: nombreEfectivo,
             contenido: contenidoPayload // <-- Empaquetado completo seguro para la base de datos
           }
         ]);
@@ -85,7 +85,7 @@ export default function Paso4_Bitacora_P2({
       alert(`Reporte científico enviado con éxito. Calificación preliminar: ${notaCalculada}`);
     } catch (err) {
       console.error(err);
-      alert("Error al despachar el reporte final a Supabase.");
+      alert("Error técnico de sincronización. Intente nuevamente.");
     } finally {
       setIsSubmitting(false);
     }
