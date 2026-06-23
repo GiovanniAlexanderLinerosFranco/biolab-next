@@ -25,6 +25,7 @@ export default function ConsolaAdminPage() {
   const [cargando, setCargando] = useState(true);
   const [errorSistema, setErrorSistema] = useState<string | null>(null);
   const [mensajeOperacion, setMensajeOperacion] = useState('');
+  const [draftFechas, setDraftFechas] = useState<Record<string, string>>({});
 
   const formatearParaInputLocal = (fechaIso: string) => {
     if (!fechaIso) return '';
@@ -101,11 +102,9 @@ export default function ConsolaAdminPage() {
   const actualizarFecha = async (
     id: string,
     campo: 'fecha_apertura' | 'fecha_cierre',
-    nuevaFecha: string,
+    isoFecha: string,
   ) => {
-    if (!nuevaFecha) return;
     try {
-      const isoFecha = new Date(nuevaFecha).toISOString();
       const response = await fetch(`/api/admin/practicas/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -120,12 +119,39 @@ export default function ConsolaAdminPage() {
       setPracticas((prev) =>
         prev.map((p) => (p.id === id ? { ...p, [campo]: isoFecha } : p)),
       );
+      const draftKey = `${id}:${campo}`;
+      setDraftFechas((prev) => {
+        const next = { ...prev };
+        delete next[draftKey];
+        return next;
+      });
     } catch (err) {
       console.error(`Error al actualizar ${campo}:`, err);
       const errorMensaje = err instanceof Error ? err.message : `No se pudo actualizar ${campo}.`;
       setMensajeOperacion(`❌ Error: ${errorMensaje}`);
       setTimeout(() => setMensajeOperacion(''), 3000);
     }
+  };
+
+  const manejarCambioFecha = (
+    id: string,
+    campo: 'fecha_apertura' | 'fecha_cierre',
+    valorLocal: string,
+  ) => {
+    const draftKey = `${id}:${campo}`;
+    setDraftFechas((prev) => ({ ...prev, [draftKey]: valorLocal }));
+
+    if (!valorLocal || valorLocal.length < 16) return;
+
+    const fecha = new Date(valorLocal);
+    if (Number.isNaN(fecha.getTime())) {
+      setMensajeOperacion('❌ Error: Fecha inválida. Verifique apertura/cierre.');
+      setTimeout(() => setMensajeOperacion(''), 3000);
+      return;
+    }
+
+    const isoFecha = fecha.toISOString();
+    actualizarFecha(id, campo, isoFecha);
   };
 
   if (cargando) {
@@ -179,10 +205,11 @@ export default function ConsolaAdminPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {practicas.map((practica) => {
-              const fechaAperturaFormateada = formatearParaInputLocal(practica.fecha_apertura);
-              const fechaCierreFormateada = formatearParaInputLocal(practica.fecha_cierre);
+              const fechaAperturaFormateada = draftFechas[`${practica.id}:fecha_apertura`] ?? formatearParaInputLocal(practica.fecha_apertura);
+              const fechaCierreFormateada = draftFechas[`${practica.id}:fecha_cierre`] ?? formatearParaInputLocal(practica.fecha_cierre);
               const rutaRegistro = `/laboratorio/registro?practica=${encodeURIComponent(practica.id)}`;
               const rutaRevision = `/laboratorio/practica/${encodeURIComponent(practica.id)}`;
+              const tituloPractica = practica.id === 'biolab_p2' ? 'Práctica 2: Histología' : practica.titulo_practica;
 
               return (
                 <div 
@@ -195,7 +222,7 @@ export default function ConsolaAdminPage() {
                     <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase">
                       {practica.asignatura}
                     </span>
-                    <h3 className="text-sm font-bold text-white tracking-tight mt-1">{practica.titulo_practica}</h3>
+                    <h3 className="text-sm font-bold text-white tracking-tight mt-1">{tituloPractica}</h3>
                     <p className="font-mono text-slate-500 text-[10px]">ID: <span className="text-slate-400 font-bold">{practica.id}</span></p>
                   </div>
                   
@@ -236,7 +263,7 @@ export default function ConsolaAdminPage() {
                       <input
                         type="datetime-local"
                         value={fechaAperturaFormateada}
-                        onChange={(e) => actualizarFecha(practica.id, 'fecha_apertura', e.target.value)}
+                        onChange={(e) => manejarCambioFecha(practica.id, 'fecha_apertura', e.target.value)}
                         className="bg-slate-900 border border-emerald-900/60 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-emerald-500"
                       />
                     </div>
@@ -247,7 +274,7 @@ export default function ConsolaAdminPage() {
                       <input
                         type="datetime-local"
                         value={fechaCierreFormateada}
-                        onChange={(e) => actualizarFecha(practica.id, 'fecha_cierre', e.target.value)}
+                        onChange={(e) => manejarCambioFecha(practica.id, 'fecha_cierre', e.target.value)}
                         className="bg-slate-900 border border-rose-900/60 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono w-full focus:outline-none focus:border-rose-500"
                       />
                     </div>

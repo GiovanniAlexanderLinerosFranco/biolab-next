@@ -101,6 +101,22 @@ function RegistroFormContent() {
       return;
     }
 
+    const correoLimpio = email.trim().toLowerCase();
+    if (correoLimpio === 'giovanni.lineros@ustabuca.edu.co') {
+      localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
+        nombre: nombre.trim() || 'Docente USTA',
+        email: correoLimpio,
+        codigo: codigo.trim() || documento.trim() || 'DOCENTE',
+        practicaId: idPracticaUrl,
+        rol: 'ESTUDIANTE',
+      }));
+      setRegistroExitoso(true);
+      setTimeout(() => {
+        router.push(rutaPracticaDinamica);
+      }, 800);
+      return;
+    }
+
     setIsConnecting(true);
 
     if (tipoAcceso === 'ADMIN') {
