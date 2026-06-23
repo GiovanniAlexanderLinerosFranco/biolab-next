@@ -67,10 +67,9 @@ export default function Practica2Histologia() {
           rol?: string;
         };
 
-        const esAdminOperador = datos.email?.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co' || datos.rol === 'ADMIN';
         const practicaValida = datos.practicaId === ID_PRACTICA;
 
-        if (!esAdminOperador && !practicaValida) {
+        if (!practicaValida) {
           alert('Sesión inválida para esta práctica. Registre su ingreso en el QR de la Práctica 2.');
           router.push('/laboratorio/registro?practica=biolab_p2');
           return;
@@ -91,8 +90,24 @@ export default function Practica2Histologia() {
 
   if (licenciaValida === false) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center font-mono text-xs text-red-500">
-        ACCESO INTERRUMPIDO DESDE LA CONSOLA DOCENTE
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
+        <div className="bg-red-950/20 border border-red-900/50 rounded-2xl p-6 text-center space-y-4 max-w-md">
+          <p className="font-mono text-xs text-red-500">ACCESO INTERRUMPIDO DESDE LA CONSOLA DOCENTE</p>
+          <div className="flex gap-2 justify-center">
+            <Link
+              href="/laboratorio"
+              className="px-3 py-2 rounded-xl text-[10px] font-mono font-bold uppercase border border-slate-700 text-slate-300 hover:bg-slate-900"
+            >
+              Panel de Prácticas
+            </Link>
+            <Link
+              href="/admin"
+              className="px-3 py-2 rounded-xl text-[10px] font-mono font-bold uppercase border border-amber-700 text-amber-300 hover:bg-amber-950/30"
+            >
+              Dashboard Admin
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -115,12 +130,20 @@ export default function Practica2Histologia() {
         {/* NAVEGACIÓN SUPERIOR INTEGRADA */}
         <header className="flex flex-col lg:flex-row justify-between items-center bg-slate-950/70 p-4 md:p-6 rounded-3xl border border-slate-800/80 backdrop-blur-2xl shadow-2xl gap-4">
           <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
-            <Link 
-              href="/laboratorio/registro" 
-              className="px-5 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-500 hover:text-white flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
-            >
-              ← Panel de Registro
-            </Link>
+            <div className="flex gap-2">
+              <Link 
+                href="/laboratorio" 
+                className="px-5 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-500 hover:text-white flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+              >
+                ← Panel
+              </Link>
+              <Link 
+                href="/admin" 
+                className="px-5 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all bg-amber-950/60 text-amber-300 border border-amber-800/50 hover:bg-amber-500 hover:text-white flex items-center gap-2"
+              >
+                Dashboard
+              </Link>
+            </div>
             <div className="text-right lg:text-left">
               <span className="bg-cyan-500/10 text-cyan-400 text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">USTA • División Salud</span>
             </div>

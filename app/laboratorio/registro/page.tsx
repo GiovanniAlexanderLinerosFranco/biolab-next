@@ -101,20 +101,6 @@ function RegistroFormContent() {
       return;
     }
 
-    // Bypass de desarrollador: acceso directo sin validaciones adicionales
-    if (email.trim().toLowerCase() === 'giovanni.lineros@ustabuca.edu.co') {
-      localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
-        nombre: 'Docente Administrador',
-        email: email.trim(),
-        codigo: 'ADMIN',
-        practicaId: idPracticaUrl,
-        rol: 'ADMIN',
-      }));
-      setRegistroExitoso(true);
-      setTimeout(() => router.push(rutaPracticaDinamica), 800);
-      return;
-    }
-
     setIsConnecting(true);
 
     if (tipoAcceso === 'ADMIN') {

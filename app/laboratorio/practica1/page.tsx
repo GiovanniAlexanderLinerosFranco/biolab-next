@@ -10,6 +10,7 @@
 
 "use client";
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Paso1_Bioseguridad from '@/components/practica1/Paso1_Bioseguridad';
 import Paso2_Fundamentos from '@/components/practica1/Paso2_Fundamentos';
 import Paso3_Microscopio from '@/components/practica1/Paso3_Microscopio';
@@ -74,6 +75,20 @@ export default function Practica1Page() {
           <div className="text-red-500 text-4xl animate-pulse">⚠️</div>
           <h2 className="text-white font-mono text-xs font-black tracking-widest uppercase">Sistema de Seguridad BioGALF</h2>
           <p className="text-xs text-red-400 font-sans leading-relaxed">{errorLicencia}</p>
+          <div className="flex gap-2 justify-center">
+            <Link
+              href="/laboratorio"
+              className="px-3 py-2 rounded-xl text-[10px] font-mono font-bold uppercase border border-slate-700 text-slate-300 hover:bg-slate-900"
+            >
+              Panel de Prácticas
+            </Link>
+            <Link
+              href="/admin"
+              className="px-3 py-2 rounded-xl text-[10px] font-mono font-bold uppercase border border-amber-700 text-amber-300 hover:bg-amber-950/30"
+            >
+              Dashboard Admin
+            </Link>
+          </div>
           <div className="text-[9px] text-slate-600 font-mono pt-4 border-t border-red-950/60">
             Copyright © 2026 BioGALF Home Health S.A.S. All Rights Reserved.
           </div>
@@ -100,6 +115,20 @@ export default function Practica1Page() {
             {estudianteNombre && (
               <p className="text-[11px] text-slate-400 font-mono mt-0.5">🧑‍🔬 Investigador: {estudianteNombre} {estudianteCodigo ? `(${estudianteCodigo})` : ''}</p>
             )}
+            <div className="mt-2 flex gap-2">
+              <Link
+                href="/laboratorio"
+                className="px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase border border-slate-700 text-slate-300 hover:bg-slate-900"
+              >
+                Panel
+              </Link>
+              <Link
+                href="/admin"
+                className="px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase border border-amber-700 text-amber-300 hover:bg-amber-950/30"
+              >
+                Dashboard
+              </Link>
+            </div>
           </div>
 
           <div className="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[10px] font-mono">
