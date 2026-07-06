@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.6.2
+ * @license CORE-ECOSYSTEM & BIOLAB VIRTUAL SYSTEM v3.6.3
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
@@ -11,8 +11,15 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
+interface DatosMuestraConsolidada {
+  concentracion: string;
+  osmolaridad: number;
+  estadoElectrolitico: 'Hipotónico' | 'Isotónico' | 'Hipertónico';
+  fenomenoObservado: string;
+}
+
 interface OsmolaritySimulatorProps {
-  onConsolidarMuestra?: (id: string, datos: any) => void;
+  onConsolidarMuestra?: (id: string, datos: DatosMuestraConsolidada) => void;
   estudianteNombre?: string;
 }
 
@@ -171,7 +178,7 @@ export default function OsmolaritySimulator({ onConsolidarMuestra, estudianteNom
           </div>
 
           <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-xl space-y-2 shadow-sm">
-            <span className="text-[9px] text-indigo-400 font-mono font-black uppercase block tracking-wider border-b border-slate-900 pb-1">Cinética del Canal O osmotic (Acuaporinas):</span>
+            <span className="text-[9px] text-indigo-400 font-mono font-black uppercase block tracking-wider border-b border-slate-900 pb-1">Cinética del Canal Osmótico (Acuaporinas):</span>
             <p className="text-slate-300 text-[11px] leading-relaxed text-justify italic">
               {modelType === 'erythrocyte' ? solucionActual.descripcionEritrocito : solucionActual.descripcionElodea}
             </p>
@@ -231,7 +238,7 @@ export default function OsmolaritySimulator({ onConsolidarMuestra, estudianteNom
                 </div>
               ) : (
                 /* MODELO CELULA VEGETAL (ELODEA) */
-                <div className="relative w-68 h-76 border-[5px] border-emerald-950 bg-emerald-950/10 shadow-[inset_0_0_40px_rgba(0,30,0,0.7),0_0_20px_rgba(16,185,129,0.05)] flex items-center justify-center rounded-sm">
+                <div className="relative w-64 h-72 border-[5px] border-emerald-950 bg-emerald-950/10 shadow-[inset_0_0_40px_rgba(0,30,0,0.7),0_0_20px_rgba(16,185,129,0.05)] flex items-center justify-center rounded-sm">
                   
                   {/* Membrana Celular Interna / Protoplasto */}
                   <div className={`transition-all duration-[1200ms] ease-out border-2 flex items-center justify-center relative
@@ -246,7 +253,7 @@ export default function OsmolaritySimulator({ onConsolidarMuestra, estudianteNom
                       ${solucionActual.estado === 'Hipertónico' ? 'w-8 h-8 rounded-full bg-cyan-950/50 border-cyan-800/40' : ''}
                     `}></div>
 
-                    {/* Cloroplastos Dinámicos según Tonicidad */}
+                    {/* Cloroplastos Dinámicos */}
                     <div className={`absolute bg-emerald-500/80 border border-emerald-400/80 shadow-md rounded-full transition-all duration-[1200ms] ${
                       solucionActual.estado === 'Hipertónico' ? 'top-14 left-10 w-4 h-4 z-10' : 'top-4 left-6 w-5 h-5'
                     }`}></div>
