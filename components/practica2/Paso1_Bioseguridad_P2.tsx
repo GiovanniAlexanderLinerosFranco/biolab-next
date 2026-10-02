@@ -89,7 +89,7 @@ export default function Paso1_Bioseguridad_P2({
             </div>
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">📧 Correo Institucional o Personal</label>
-              <input type="email" value={estudianteEmail} onChange={(e) => setEstudianteEmail(e.target.value)} disabled={status === 'success'} className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 outline-none focus:border-cyan-400 font-semibold" placeholder="usuario@ustabuca.edu.co..." />
+              <input type="email" value={estudianteEmail} onChange={(e) => setEstudianteEmail(e.target.value)} disabled={status === 'success'} className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 outline-none focus:border-cyan-400 font-semibold" placeholder="usuario@correo.com..." />
             </div>
             <button onClick={iniciarSesionEnSupabase} disabled={isConnecting || status === 'success'} className={`w-full p-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${status === 'success' ? 'bg-green-600/20 text-green-400 border border-green-500/50 cursor-default' : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.3)]'}`}>
               {isConnecting ? "Validando conexión..." : status === 'success' ? "✓ Sesión Histológica Activada" : status === 'error' ? "❌ Error (Reintentar)" : "Activar Sesión de Laboratorio"}

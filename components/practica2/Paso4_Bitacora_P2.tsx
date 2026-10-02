@@ -31,7 +31,7 @@ export default function Paso4_Bitacora_P2({
 
   const enviarReporteFinal = async () => {
     // SALVAGUARDA DEFENSIVA: Recuperación de identidad desde almacenamiento local si falla el estado de la PWA
-    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@ustabuca.edu.co';
+    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@biolab.local';
     const nombreEfectivo = estudianteNombre || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_nombre') : null) || 'Estudiante Anonimo';
 
     if (!tablaTejidos.M1.tejido || !tablaTejidos.M2.tejido || !analisisDiagnostico.trim()) {

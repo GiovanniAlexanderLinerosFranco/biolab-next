@@ -11,16 +11,15 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import Paso1_Bioseguridad_P2 from '@/components/practica2/Paso1_Bioseguridad_P2';
 import Paso2_Diagnostico_P2 from '@/components/practica2/Paso2_Diagnostico_P2';
 import Paso3_Atlas_P2 from '@/components/practica2/Paso3_Atlas_P2';
 import Paso4_Bitacora_P2 from '@/components/practica2/Paso4_Bitacora_P2';
 import { verificarLicenciaPropiedadIntelectual } from '@/lib/copyrightGuard';
+import { ensureDemoSession } from '@/lib/openAccess';
 
 export default function Practica2Histologia() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   
   const [estudianteNombre, setEstudianteNombre] = useState('');
@@ -48,34 +47,18 @@ export default function Practica2Histologia() {
       if (!proteccion.autorizado) {
         setLicenciaValida(false);
         alert(`SISTEMA BLOQUEADO: ${proteccion.msg}`);
-        router.push('/laboratorio/registro?practica=biolab_p2');
         return;
       }
       setLicenciaValida(true);
-    };
-    
-    validarEntorno();
 
-    const sesionGuardada = localStorage.getItem('biolab_estudiante_sesion');
-    if (sesionGuardada) {
-      try {
-        const datos = JSON.parse(sesionGuardada);
-        if (datos.practicaId !== ID_PRACTICA) {
-          alert('Sesión inválida para esta práctica. Registre su ingreso en el QR de la Práctica 2.');
-          router.push('/laboratorio/registro?practica=biolab_p2');
-          return;
-        }
-        setEstudianteNombre(datos.nombre || '');
-        setEstudianteEmail(datos.email || '');
-        setEstudianteCodigo(datos.codigo || '');
-      } catch (e) {
-        console.error("Error al parsear sesión del núcleo:", e);
-      }
-    } else {
-      alert("Acceso Restringido: Debe registrar su asistencia antes de iniciar el simulador.");
-      router.push('/laboratorio/registro?practica=biolab_p2');
-    }
-  }, [router]);
+      const sesion = ensureDemoSession(ID_PRACTICA);
+      setEstudianteNombre(sesion.nombre);
+      setEstudianteEmail(sesion.email);
+      setEstudianteCodigo(sesion.codigo);
+    };
+
+    validarEntorno();
+  }, []);
 
   if (licenciaValida === false) {
     return (
@@ -100,7 +83,7 @@ export default function Practica2Histologia() {
         <header className="flex flex-col lg:flex-row justify-between items-center bg-slate-950/70 p-4 md:p-6 rounded-3xl border border-slate-800/80 backdrop-blur-2xl shadow-2xl gap-4">
           <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
             <Link href="/laboratorio" className="px-5 py-2 rounded-xl font-bold uppercase tracking-widest text-[10px] bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 hover:bg-cyan-500 flex items-center gap-2">← Panel</Link>
-            <span className="bg-cyan-500/10 text-cyan-400 text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">USTA • División Salud</span>
+            <span className="bg-cyan-500/10 text-cyan-400 text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border border-cyan-500/20 uppercase tracking-wider">BioGALF · BioLab Virtual</span>
           </div>
 
           <div className="flex flex-wrap justify-center gap-2.5 w-full lg:w-auto">

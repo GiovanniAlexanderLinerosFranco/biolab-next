@@ -16,6 +16,7 @@ import Paso2_Fundamentos from '@/components/practica1/Paso2_Fundamentos';
 import Paso3_Microscopio from '@/components/practica1/Paso3_Microscopio';
 import Paso5_Bitacora from '@/components/practica1/Paso5_Bitacora';
 import { verificarLicenciaPropiedadIntelectual } from '@/lib/copyrightGuard';
+import { ensureDemoSession } from '@/lib/openAccess';
 import { inicializarSeguridadPortapapeles } from '@/lib/antiFraude';
 
 export default function Practica1Page() {
@@ -57,6 +58,10 @@ export default function Practica1Page() {
         return;
       }
       if (licenciaValida === null) setLicenciaValida(true);
+      const sesion = ensureDemoSession(ID_PRACTICA);
+      if (!estudianteNombre) setEstudianteNombre(sesion.nombre);
+      if (!estudianteEmail) setEstudianteEmail(sesion.email);
+      if (!estudianteCodigo) setEstudianteCodigo(sesion.codigo);
     };
 
     validarDerechosAutor();

@@ -3,8 +3,10 @@ import "./globals.css";
 import PWARegister from "@/components/PWARegister";
 
 export const metadata: Metadata = {
-  title: "BioLab Virtual USTA",
-  description: "Entorno de Simulación Microscópica Avanzada",
+  title: "BioLab Virtual — Laboratorio de biología celular y molecular",
+  description:
+    "PWA educativa con 8 prácticas interactivas, simuladores y bitácoras. Licencias para universidades, editoriales e interesados.",
+  applicationName: "BioLab Virtual",
 };
 
 export default function RootLayout({

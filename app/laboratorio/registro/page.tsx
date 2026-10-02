@@ -39,11 +39,11 @@ function RegistroFormContent() {
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [tipoAcceso, setTipoAcceso] = useState<'ESTUDIANTE' | 'ADMIN'>('ESTUDIANTE');
 
-  const correoUSTA = /^[^\s@]+@ustabuca\.edu\.co$/;
+  const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
     const correoLimpio = email.trim().toLowerCase();
-    if (correoLimpio === 'giovanni.lineros@ustabuca.edu.co') {
+    if (correoLimpio === 'giovannilineros@biogalfhomehealth.com' || correoLimpio === 'gioalf01@hotmail.com') {
       setTipoAcceso('ADMIN');
     } else {
       setTipoAcceso('ESTUDIANTE');
@@ -92,19 +92,19 @@ function RegistroFormContent() {
     setMensajeAlerta('');
 
     if (!email.trim()) {
-      alert("Por favor, ingrese su correo institucional.");
+      alert("Por favor, ingrese su correo electrónico.");
       return;
     }
 
-    if (!correoUSTA.test(email.trim())) {
-      setMensajeAlerta("❌ Acceso Denegado: Para este piloto intersemestral, es obligatorio el uso exclusivo de tu correo institucional (@ustabuca.edu.co).");
+    if (!correoValido.test(email.trim())) {
+      setMensajeAlerta("❌ Ingrese un correo electrónico válido.");
       return;
     }
 
     const correoLimpio = email.trim().toLowerCase();
-    if (correoLimpio === 'giovanni.lineros@ustabuca.edu.co') {
+    if (correoLimpio === 'giovannilineros@biogalfhomehealth.com' || correoLimpio === 'gioalf01@hotmail.com') {
       localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
-        nombre: nombre.trim() || 'Docente USTA',
+        nombre: nombre.trim() || 'Docente',
         email: correoLimpio,
         codigo: codigo.trim() || documento.trim() || 'DOCENTE',
         practicaId: idPracticaUrl,
@@ -216,16 +216,14 @@ function RegistroFormContent() {
               BioLAB Virtual System v3.2
             </span>
             <h1 className="text-2xl font-extrabold text-white mt-4 tracking-tight leading-tight uppercase font-sans">
-              División de Ciencias <br />de la Salud
+              BioGALF Home Health <br />BioLab Virtual
             </h1>
           </div>
 
-{/* CONTENEDOR MODIFICADO PARA CARGAR LA FOTO DEL LABORATORIO USTA EN COLORES REALES */}
 <div className="my-6 relative aspect-video w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 shadow-inner">
   <img 
     src="/assets/banner-guia1.png" 
-    alt="Laboratorio Biología Celular y Molecular USTA" 
-    // CORREGIDO: Eliminado 'grayscale' y ajustada la opacidad
+    alt="Laboratorio de biología celular y molecular BioLab Virtual" 
     className="object-cover w-full h-full opacity-80 transition-all duration-300" 
   />
   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
@@ -262,11 +260,11 @@ function RegistroFormContent() {
             <form onSubmit={procesarRegistroPiloto} className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Correo Institucional USTA:</label>
+                  <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Correo electrónico:</label>
                   <input
                     required
                     type="email"
-                    placeholder="ejemplo@ustabuca.edu.co"
+                    placeholder="nombre@correo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono font-semibold transition-all"

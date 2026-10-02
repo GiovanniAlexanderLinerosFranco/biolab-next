@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data, error } = await supabaseAdmin
     .from('ecosistema_configuracion')
-    .select('id, asignatura, titulo_practica, estado, fecha_apertura, fecha_cierre')
+    .select('id, asignatura, titulo_practica, estado')
     .order('id', { ascending: true });
 
   if (error) {

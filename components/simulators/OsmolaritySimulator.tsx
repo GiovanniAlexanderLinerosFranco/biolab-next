@@ -38,7 +38,7 @@ interface ConfiguracionFisiologica {
   coeficientePermeabilidad: number; // Factor P_f de acuaporinas modificado
 }
 
-// Matriz Termodinámica de Soluciones según Guías Clínicas de la USTA
+// Matriz termodinámica de soluciones (protocolo BioLab)
 const CONFIGURACIONES_MEDIO: Record<string, ConfiguracionFisiologica> = {
   'hipotonico': { id: 'hipotonico', concentracionNaCl: 0.4, osmolaridadNominal: 136, estadoTonicidad: 'HIPOTÓNICO', coeficientePermeabilidad: 1.45 },
   'isotonico': { id: 'isotonico', concentracionNaCl: 0.9, osmolaridadNominal: 308, estadoTonicidad: 'ISOTÓNICO', coeficientePermeabilidad: 1.00 },
@@ -114,7 +114,7 @@ export default function OsmolaritySimulator({ onConsolidarMuestra, estudianteNom
   // --- MEDIDAS DE CONTROL ANTIFRAUDE Y SEGURIDAD ACADÉMICA ---
   const activarDefensaAntiFraude = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    alert("🛡️ PROTOCOLO DE EXPORTACIÓN BIOLAB: Se prohíbe el copiado, pegado o arrastre de datos para validar las competencias de análisis crítico de la rúbrica USTA.");
+    alert("PROTOCOLO DE EXPORTACIÓN BIOLAB: Se prohíbe el copiado, pegado o arrastre de datos para validar el análisis crítico de la práctica.");
   };
 
   const procesarConsolidacion = () => {

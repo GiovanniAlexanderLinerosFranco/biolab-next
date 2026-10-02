@@ -44,7 +44,7 @@ export default function Paso4_Bitacora_P4({
   };
 
   const enviarReporteFinal = async () => {
-    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@ustabuca.edu.co';
+    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@biolab.local';
     const nombreEfectivo = estudianteNombre || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_nombre') : null) || 'Estudiante Anonimo';
 
     // Verificación defensiva de flujos completos en el simulador

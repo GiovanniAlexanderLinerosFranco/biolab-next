@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
   const { data: config, error: errorConfig } = await supabaseAdmin
     .from('ecosistema_configuracion')
-    .select('estado, fecha_apertura, fecha_cierre')
+    .select('estado')
     .eq('id', practicaId)
     .single();
 
@@ -57,17 +57,6 @@ export async function POST(request: NextRequest) {
   if (!config.estado) {
     return NextResponse.json(
       { ok: false, message: 'La práctica está bloqueada por cátedra en este momento.' },
-      { status: 403 }
-    );
-  }
-
-  const ahora = new Date();
-  const apertura = new Date(config.fecha_apertura);
-  const cierre = new Date(config.fecha_cierre);
-
-  if (ahora < apertura || ahora > cierre) {
-    return NextResponse.json(
-      { ok: false, message: 'La práctica está fuera de la ventana horaria permitida.' },
       { status: 403 }
     );
   }

@@ -6,8 +6,6 @@ export const dynamic = 'force-dynamic';
 
 type UpdatePayload = {
   estado?: boolean;
-  fecha_apertura?: string;
-  fecha_cierre?: string;
 };
 
 export async function PATCH(
@@ -28,67 +26,18 @@ export async function PATCH(
   const { id } = await params;
   const body = (await request.json()) as UpdatePayload;
 
-  const updateData: { estado?: boolean; fecha_apertura?: string; fecha_cierre?: string } = {};
-
-  if (typeof body.estado === 'boolean') {
-    updateData.estado = body.estado;
-  }
-
-  if (typeof body.fecha_apertura === 'string' && body.fecha_apertura.trim()) {
-    updateData.fecha_apertura = body.fecha_apertura;
-  }
-
-  if (typeof body.fecha_cierre === 'string' && body.fecha_cierre.trim()) {
-    updateData.fecha_cierre = body.fecha_cierre;
-  }
-
-  if (Object.keys(updateData).length === 0) {
+  if (typeof body.estado !== 'boolean') {
     return NextResponse.json(
-      { ok: false, message: 'No hay campos válidos para actualizar.' },
+      { ok: false, message: 'Solo se admite actualizar el interruptor de estado (activado/apagado).' },
       { status: 400 }
     );
   }
 
-  if (updateData.fecha_apertura || updateData.fecha_cierre) {
-    const { data: actual, error: errorActual } = await supabaseAdmin
-      .from('ecosistema_configuracion')
-      .select('fecha_apertura, fecha_cierre')
-      .eq('id', id)
-      .single();
-
-    if (errorActual || !actual) {
-      return NextResponse.json(
-        { ok: false, message: errorActual?.message || 'No se pudo validar la práctica objetivo.' },
-        { status: 404 }
-      );
-    }
-
-    const fechaAperturaFinal = updateData.fecha_apertura ?? actual.fecha_apertura;
-    const fechaCierreFinal = updateData.fecha_cierre ?? actual.fecha_cierre;
-
-    const apertura = new Date(fechaAperturaFinal);
-    const cierre = new Date(fechaCierreFinal);
-
-    if (Number.isNaN(apertura.getTime()) || Number.isNaN(cierre.getTime())) {
-      return NextResponse.json(
-        { ok: false, message: 'Las fechas de apertura/cierre no tienen un formato válido.' },
-        { status: 400 }
-      );
-    }
-
-    if (apertura >= cierre) {
-      return NextResponse.json(
-        { ok: false, message: 'La fecha de apertura debe ser menor que la fecha de cierre.' },
-        { status: 400 }
-      );
-    }
-  }
-
   const { data, error } = await supabaseAdmin
     .from('ecosistema_configuracion')
-    .update(updateData)
+    .update({ estado: body.estado })
     .eq('id', id)
-    .select('id, asignatura, titulo_practica, estado, fecha_apertura, fecha_cierre')
+    .select('id, asignatura, titulo_practica, estado')
     .single();
 
   if (error) {

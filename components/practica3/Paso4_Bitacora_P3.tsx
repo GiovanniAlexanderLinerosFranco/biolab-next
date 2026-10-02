@@ -19,9 +19,12 @@ interface BitacoraProps {
     grupoSanguineoEstudiante: string;
     grupoSanguineoCorrecto: string;
     esGrupoCorrecto: boolean;
-    respuestaTransduccionEstudiante: string;
-    respuestaTransduccionCorrecta: string;
-    esTransduccionCorrecta: boolean;
+    mecanismoSeñalizacionEstudiante?: string;
+    mecanismoSeñalizacionCorrecto?: string;
+    esSeñalizacionCorrecta?: boolean;
+    respuestaTransduccionEstudiante?: string;
+    respuestaTransduccionCorrecta?: string;
+    esTransduccionCorrecta?: boolean;
   }>;
 }
 
@@ -48,7 +51,7 @@ export default function Paso4_Bitacora_P3({
   };
 
   const enviarReporteFinal = async () => {
-    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@ustabuca.edu.co';
+    const emailEfectivo = estudianteEmail || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_email') : null) || 'anonimo@biolab.local';
     const nombreEfectivo = estudianteNombre || (typeof window !== 'undefined' ? localStorage.getItem('biolab_estudiante_nombre') : null) || 'Estudiante Anonimo';
 
     // Validación defensiva estricta de completitud
@@ -78,7 +81,7 @@ export default function Paso4_Bitacora_P3({
     llavesPacientes.forEach(id => {
       const data = respuestasAglutinacion[id];
       if (data.esGrupoCorrecto) aciertos++;
-      if (data.esTransduccionCorrecta) aciertos++;
+      if (data.esSeñalizacionCorrecta || data.esTransduccionCorrecta) aciertos++;
     });
 
     // Ponderación precisa de escala de 1.0 a 5.0 (0.5 puntos netos por acierto biológico)

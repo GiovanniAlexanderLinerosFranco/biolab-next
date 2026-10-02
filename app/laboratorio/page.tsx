@@ -4,7 +4,7 @@
  * @copyright (c) 2026 PhD. Giovanni Alexander Lineros Franco.
  * All Rights Reserved.
  * PROPERTY OF BIOGALF HOME HEALTH S.A.S.
- * * PANEL CENTRAL INTEGRADO CON BASE DE DATOS Y BANNER REAL USTA
+ * * PANEL CENTRAL INTEGRADO CON BASE DE DATOS Y BANNER BIOLAB
  * ============================================================================
  */
 
@@ -20,20 +20,34 @@ type EstadoPractica = {
 };
 
 const PRACTICAS = [
-  { id: 'biolab_p1', numero: '01', titulo: 'Bioseguridad, Diversidad y Microscopía' },
-  { id: 'biolab_p2', numero: '02', titulo: 'Entre Células y Capas: Tejidos Humanos' },
-  { id: 'biolab_p3', numero: '03', titulo: 'Receptores de Membrana Celular (ABO/Rh)' },
-  { id: 'biolab_p4', numero: '04', titulo: 'Comunicación Celular y Flujo de Sustancias' },
-  { id: 'biolab_p5', numero: '05', titulo: 'Índice Mitótico y Ciclo Celular' },
-  { id: 'biolab_p6', numero: '06', titulo: 'Extracción y Aislamiento de ADN' },
-  { id: 'biolab_p7', numero: '07', titulo: 'Transcripción y Traducción Génica' },
-  { id: 'biolab_p8', numero: '08', titulo: 'Mutaciones Moleculares y Variabilidad' },
+  { id: 'biolab_p1', numero: '01', titulo: 'Bioseguridad, Diversidad y Microscopía', ruta: '/laboratorio/practica1' },
+  { id: 'biolab_p2', numero: '02', titulo: 'Entre Células y Capas: Tejidos Humanos', ruta: '/laboratorio/practica2' },
+  { id: 'biolab_p3', numero: '03', titulo: 'Receptores de Membrana Celular (ABO/Rh)', ruta: '/laboratorio/practica3' },
+  { id: 'biolab_p4', numero: '04', titulo: 'Comunicación Celular y Flujo de Sustancias', ruta: '/laboratorio/practica4' },
+  { id: 'biolab_p5', numero: '05', titulo: 'Índice Mitótico y Ciclo Celular', ruta: '/laboratorio/practica5' },
+  { id: 'biolab_p6', numero: '06', titulo: 'Extracción y Aislamiento de ADN', ruta: '/laboratorio/practica6' },
+  { id: 'biolab_p7', numero: '07', titulo: 'Transcripción y Traducción Génica', ruta: '/laboratorio/practica7' },
+  { id: 'biolab_p8', numero: '08', titulo: 'Mutaciones Moleculares y Variabilidad', ruta: '/laboratorio/practica8' },
 ];
 
 export default function PanelLaboratorios() {
   const [estadosDB, setEstadosDB] = useState<Record<string, EstadoPractica>>({});
   const [cargando, setCargando] = useState(true);
-  const [practicaSeleccionadaQR, setPracticaSeleccionadaQR] = useState('biolab_p2');
+  const [practicaSeleccionadaQR, setPracticaSeleccionadaQR] = useState('biolab_p3');
+
+  const prepararSesion = (practica: (typeof PRACTICAS)[number]) => {
+    localStorage.setItem(
+      'biolab_estudiante_sesion',
+      JSON.stringify({
+        nombre: 'Visitante demo',
+        email: 'demo@biolab.local',
+        codigo: 'DEMO',
+        practicaId: practica.id,
+        rol: 'ESTUDIANTE',
+        origen: 'panel-directo',
+      }),
+    );
+  };
 
   useEffect(() => {
     const consultarInterruptores = async () => {
@@ -100,7 +114,7 @@ export default function PanelLaboratorios() {
         <header className="bg-slate-950/60 border border-slate-800/80 p-6 rounded-3xl backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
           <div>
             <h1 className="text-2xl font-black text-white uppercase tracking-tight">BioLab Virtual • PWA</h1>
-            <p className="text-xs font-mono text-cyan-400">Universidad Santo Tomás — División de Ciencias de la Salud</p>
+            <p className="text-xs font-mono text-cyan-400">BioGALF Home Health · Laboratorio de biología celular y molecular</p>
           </div>
           <div className="bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 rounded-xl text-center">
             <span className="text-[10px] font-mono text-cyan-400 font-bold block uppercase tracking-widest">Estación de Servidor</span>
@@ -108,13 +122,12 @@ export default function PanelLaboratorios() {
           </div>
         </header>
 
-{/* PROYECTOR DE AULA CON EL BANNER REAL DEL LABORATORIO USTA (COLORES ORIGINALES) */}
+{/* PROYECTOR DE AULA CON BANNER DEL LABORATORIO */}
 <section className="relative border border-slate-800/80 rounded-3xl overflow-hidden min-h-[220px] flex items-center shadow-2xl">
   <div className="absolute inset-0 z-0">
     <img 
       src="/assets/banner-guia1.png" 
-      alt="Laboratorio Real USTA" 
-      // CORREGIDO: Eliminado 'grayscale' y subida la opacidad para mantener los colores vivos reales
+      alt="Laboratorio BioLab Virtual" 
       className="w-full h-full object-cover object-center opacity-85 transition-all duration-300"
     />
     {/* Máscara de contraste optimizada para no saturar ni apagar los colores originales */}
@@ -156,8 +169,8 @@ export default function PanelLaboratorios() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {PRACTICAS.map((p) => {
             const estadoPractica = estadosDB[p.id];
-            const estaActivaEnDB = estadoPractica?.acceso_habilitado === true;
-            const estaEncendida = estadoPractica?.estado === true;
+            // Sin dato de BD (o red caída): práctica abierta. Solo bloquea interruptor docente.
+            const estaActivaEnDB = estadoPractica ? estadoPractica.acceso_habilitado === true : true;
             const motivoBloqueo = estadoPractica?.motivo_bloqueo || 'Acceso restringido por configuración docente.';
             const hrefRegistro = `/laboratorio/registro?practica=${encodeURIComponent(p.id)}`;
 
@@ -175,11 +188,9 @@ export default function PanelLaboratorios() {
                   <span className={`text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
                     estaActivaEnDB 
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse' 
-                      : estaEncendida
-                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                       : 'bg-slate-800 text-slate-500 border-slate-700'
                   }`}>
-                    {estaActivaEnDB ? "ACTIVA EN VIVO" : estaEncendida ? 'FUERA DE HORARIO' : "BLOQUEADO"}
+                    {estaActivaEnDB ? "DISPONIBLE" : "BLOQUEADO"}
                   </span>
                 </div>
                 
@@ -188,12 +199,21 @@ export default function PanelLaboratorios() {
                 </h3>
 
                 {estaActivaEnDB ? (
-                  <Link 
-                    href={hrefRegistro}
-                    className="w-full text-center py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg border border-cyan-400/30"
-                  >
-                    REGISTRAR E INGRESAR
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      href={p.ruta}
+                      onClick={() => prepararSesion(p)}
+                      className="block w-full rounded-xl border border-emerald-400/40 bg-emerald-600 py-2 text-center font-mono text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-emerald-500"
+                    >
+                      Entrar ahora
+                    </Link>
+                    <Link 
+                      href={hrefRegistro}
+                      className="block w-full rounded-xl border border-cyan-400/30 bg-cyan-950/40 py-2 text-center font-mono text-[10px] font-black uppercase tracking-widest text-cyan-200 transition-all hover:bg-cyan-900/50"
+                    >
+                      Registro (opcional)
+                    </Link>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     <div className="w-full text-center py-2 bg-slate-950/50 border border-slate-900 text-slate-600 font-mono text-[10px] font-bold uppercase tracking-widest rounded-xl cursor-not-allowed">

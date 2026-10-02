@@ -23,7 +23,7 @@ export async function GET(
 
   const { data, error } = await supabaseAdmin
     .from('ecosistema_configuracion')
-    .select('id, estado, titulo_practica, fecha_apertura, fecha_cierre')
+    .select('id, estado, titulo_practica')
     .eq('id', id)
     .single();
 
@@ -35,28 +35,11 @@ export async function GET(
   }
 
   const ahora = new Date();
-  const apertura = data.fecha_apertura ? new Date(data.fecha_apertura) : null;
-  const cierre = data.fecha_cierre ? new Date(data.fecha_cierre) : null;
-
-  let accesoHabilitado = Boolean(data.estado);
-  let motivoBloqueo = '';
-
-  if (!data.estado) {
-    accesoHabilitado = false;
-    motivoBloqueo = 'La práctica está desactivada por cátedra.';
-  } else if (!apertura || Number.isNaN(apertura.getTime())) {
-    accesoHabilitado = false;
-    motivoBloqueo = 'La práctica no tiene fecha de apertura válida.';
-  } else if (!cierre || Number.isNaN(cierre.getTime())) {
-    accesoHabilitado = false;
-    motivoBloqueo = 'La práctica no tiene fecha de cierre válida.';
-  } else if (ahora < apertura) {
-    accesoHabilitado = false;
-    motivoBloqueo = 'La práctica aún no está dentro de la ventana horaria de apertura.';
-  } else if (ahora > cierre) {
-    accesoHabilitado = false;
-    motivoBloqueo = 'La práctica se encuentra fuera de la ventana horaria permitida.';
-  }
+  // Acceso abierto por horario: solo el interruptor docente (estado) puede bloquear.
+  const accesoHabilitado = Boolean(data.estado);
+  const motivoBloqueo = data.estado
+    ? ''
+    : 'La práctica está desactivada por cátedra.';
 
   return NextResponse.json({
     ok: true,
