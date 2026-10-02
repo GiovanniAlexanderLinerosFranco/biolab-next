@@ -39,11 +39,7 @@ export default function Paso1_Bioseguridad_P3({
       return;
     }
     if (!estudianteEmail.trim() || !correoValido) {
-      alert("Por favor, ingresa un correo electrónico institucional válido.");
-      return;
-    }
-    if (!isSupabaseConfigured || !supabase) {
-      alert("Error: El cliente de Supabase no está configurado de forma segura.");
+      alert("Por favor, ingresa un correo electrónico válido.");
       return;
     }
 
@@ -51,25 +47,37 @@ export default function Paso1_Bioseguridad_P3({
     setStatus('idle');
 
     try {
-      const { error } = await supabase
-        .from('bitacoras_practica_3')
-        .insert([
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'biolab_estudiante_sesion',
+          JSON.stringify({
+            nombre: estudianteNombre.trim(),
+            email: estudianteEmail.trim(),
+            codigo: 'DEMO',
+            practicaId: 'biolab_p3',
+            rol: 'ESTUDIANTE',
+            origen: 'practica3-acceso-abierto',
+          })
+        );
+      }
+
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.from('bitacoras_practica_3').insert([
           {
             estudiante_nombre: estudianteNombre,
             estudiante_email: estudianteEmail,
             respuestas_desafios: {},
             tabla_aglutinacion: {},
-            analisis_clinico: "Sesión inicial activada para Práctica 3 de Receptores"
-          }
+            analisis_clinico: 'Sesión inicial activada para Práctica 3 de Receptores',
+          },
         ]);
+        if (error) console.warn('Bitácora remota no disponible:', error.message);
+      }
 
-      if (error) throw error;
       setStatus('success');
-      console.log("¡Sesión de Receptores de Membrana iniciada en Supabase!");
     } catch (error) {
       console.error(error);
-      setStatus('error');
-      alert("Error al registrar el acceso en la base de datos.");
+      setStatus('success');
     } finally {
       setIsConnecting(false);
     }

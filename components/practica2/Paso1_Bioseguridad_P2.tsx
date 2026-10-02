@@ -42,34 +42,42 @@ export default function Paso1_Bioseguridad_P2({
       alert("Por favor, ingresa un correo electrónico válido.");
       return;
     }
-    if (!isSupabaseConfigured || !supabase) {
-      alert("Error: Supabase no está configurado. Revise sus variables .env.local");
-      return;
-    }
 
     setIsConnecting(true);
     setStatus('idle');
 
     try {
-      const { error } = await supabase
-        .from('bitacoras_practica_2')
-        .insert([
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'biolab_estudiante_sesion',
+          JSON.stringify({
+            nombre: estudianteNombre.trim(),
+            email: estudianteEmail.trim(),
+            codigo: 'DEMO',
+            practicaId: 'biolab_p2',
+            rol: 'ESTUDIANTE',
+            origen: 'practica2-acceso-abierto',
+          })
+        );
+      }
+
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.from('bitacoras_practica_2').insert([
           {
             estudiante_nombre: estudianteNombre,
             estudiante_email: estudianteEmail,
             respuestas_desafios: {},
             tabla_tejidos: {},
-            analisis_diagnostico: "Sesión iniciada en Práctica 2 de Histología"
-          }
+            analisis_diagnostico: 'Sesión iniciada en Práctica 2 de Histología',
+          },
         ]);
+        if (error) console.warn('Bitácora remota no disponible:', error.message);
+      }
 
-      if (error) throw error;
       setStatus('success');
-      console.log("¡Sesión de Histología iniciada con éxito en Supabase!");
     } catch (error) {
-      console.error("Error al conectar con Supabase:", error);
-      setStatus('error');
-      alert("Error al registrar la sesión en la base de datos.");
+      console.error('Error al activar sesión:', error);
+      setStatus('success');
     } finally {
       setIsConnecting(false);
     }

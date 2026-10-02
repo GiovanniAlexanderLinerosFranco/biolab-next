@@ -83,56 +83,54 @@ export default function Paso1_Bioseguridad({
       return;
     }
 
-    if (!estudianteCodigo.trim() || estudianteCodigo.length < 7) {
-      alert("Por favor, ingresa un código institucional válido.");
-      return;
-    }
-
     if (!estudianteEmail.trim() || !correoValido) {
-      alert("Por favor, ingresa un correo válido institucional o personal.");
-      return;
-    }
-
-    if (!estudianteDocumento.trim()) {
-      alert("Por favor, ingresa tu documento de identidad.");
-      return;
-    }
-
-    if (!isSupabaseConfigured || !supabase) {
-      alert("Error: Supabase no está configurado. Revisa tus variables .env.local");
+      alert("Por favor, ingresa un correo electrónico válido.");
       return;
     }
 
     setIsConnecting(true);
     setStatus('idle');
 
+    const codigoEfectivo = estudianteCodigo.trim() || 'DEMO';
+    const documentoEfectivo = estudianteDocumento.trim() || 'N/A';
+
     try {
-      // Registrar e inicializar la bitácora de la práctica
-      const { error } = await supabase
-        .from('bitacoras_practica_1')
-        .insert([
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'biolab_estudiante_sesion',
+          JSON.stringify({
+            nombre: estudianteNombre.trim(),
+            email: estudianteEmail.trim(),
+            codigo: codigoEfectivo,
+            documento: documentoEfectivo,
+            practicaId: 'biolab_p1',
+            rol: 'ESTUDIANTE',
+            origen: 'practica1-acceso-abierto',
+          })
+        );
+      }
+
+      // Bitácora remota opcional: si falla, la demo local sigue.
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.from('bitacoras_practica_1').insert([
           {
             estudiante_nombre: estudianteNombre,
             estudiante_email: estudianteEmail,
             respuestas_desafios: {},
             tabla_muestras: {},
-            analis_contraste: "Inicio de sesión en Paso 1",
-            conclusiones_preguntas: {}
-          }
+            analis_contraste: 'Inicio de sesión en Paso 1',
+            conclusiones_preguntas: {},
+          },
         ]);
-
-      if (error) throw error;
+        if (error) console.warn('Bitácora remota no disponible:', error.message);
+      }
 
       setStatus('success');
-      console.log("¡Conexión exitosa! Sesión iniciada en Supabase.");
-      
-      // LIBERACIÓN CORE: Se dispara el acceso controlado a las demás estaciones
       if (onAccesoConcedido) onAccesoConcedido();
-
     } catch (error) {
-      console.error("Error al conectar con Supabase:", error);
-      setStatus('error');
-      alert("Error al registrar la sesión en la base de datos. Revisa la consola.");
+      console.error('Error al activar sesión:', error);
+      setStatus('success');
+      if (onAccesoConcedido) onAccesoConcedido();
     } finally {
       setIsConnecting(false);
     }
@@ -164,15 +162,15 @@ export default function Paso1_Bioseguridad({
               />
             </div>
 
-            {/* INPUT: CÓDIGO */}
+            {/* INPUT: CÓDIGO (opcional) */}
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                🆔 Código Institucional
+                Código de acceso (opcional)
               </label>
               <input
                 type="text"
-                maxLength={8}
-                placeholder="Ej: 2214056"
+                maxLength={32}
+                placeholder="Opcional — déjalo vacío en demo"
                 value={estudianteCodigo}
                 onChange={(e) => setEstudianteCodigo(e.target.value)}
                 disabled={status === 'success'}
@@ -183,11 +181,11 @@ export default function Paso1_Bioseguridad({
             {/* INPUT: CORREO */}
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                📧 Correo institucional o personal
+                Correo electrónico
               </label>
               <input
                 type="email"
-                placeholder="usuario@universidad.edu.co"
+                placeholder="tu@correo.com"
                 value={estudianteEmail}
                 onChange={(e) => setEstudianteEmail(e.target.value)}
                 disabled={status === 'success'}
@@ -195,14 +193,14 @@ export default function Paso1_Bioseguridad({
               />
             </div>
 
-            {/* INPUT: DOCUMENTO */}
+            {/* INPUT: DOCUMENTO (opcional) */}
             <div>
               <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                📄 Documento de Identidad
+                Documento (opcional)
               </label>
               <input
                 type="text"
-                placeholder="Número de documento..."
+                placeholder="Opcional"
                 value={estudianteDocumento}
                 onChange={(e) => setEstudianteDocumento(e.target.value)}
                 disabled={status === 'success'}

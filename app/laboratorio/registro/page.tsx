@@ -11,6 +11,7 @@
 "use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { BIOLAB_OPEN_ACCESS } from '@/lib/openAccess';
 
 function RegistroFormContent() {
   const router = useRouter();
@@ -135,19 +136,36 @@ function RegistroFormContent() {
       return;
     }
 
-    if (!nombre.trim() || !documento.trim()) {
-      alert("Por favor, complete su nombre y documento de identidad.");
+    if (!nombre.trim()) {
+      alert("Por favor, complete su nombre.");
       setIsConnecting(false);
       return;
     }
 
-    if (!estadoPractica.activa) {
-      setMensajeAlerta(`⚠️ Control de Cátedra: ${estadoPractica.motivoBloqueo || 'La práctica seleccionada no se encuentra activa en este momento. Por favor, solicite al docente la apertura del entorno.'}`);
+    if (!BIOLAB_OPEN_ACCESS && !estadoPractica.activa) {
+      setMensajeAlerta(`La práctica no está activa: ${estadoPractica.motivoBloqueo || 'solicita apertura al docente.'}`);
       setIsConnecting(false);
       return;
     }
 
     try {
+      // Acceso abierto / demo: no exige API ni código institucional.
+      if (BIOLAB_OPEN_ACCESS) {
+        localStorage.setItem('biolab_estudiante_sesion', JSON.stringify({
+          nombre: nombre.trim(),
+          email: email.trim(),
+          codigo: codigo.trim() || documento.trim() || 'DEMO',
+          practicaId: idPracticaUrl,
+          rol: 'ESTUDIANTE',
+          origen: 'registro-acceso-abierto',
+        }));
+        setRegistroExitoso(true);
+        setTimeout(() => {
+          router.push(rutaPracticaDinamica);
+        }, 600);
+        return;
+      }
+
       const fingerprintHardware = btoa(navigator.userAgent + navigator.hardwareConcurrency).substring(0, 32);
 
       const response = await fetch('/api/registro/ingreso', {
@@ -169,7 +187,7 @@ function RegistroFormContent() {
       const payload = (await response.json()) as { ok: boolean; code?: string; message?: string };
 
       if (response.status === 409 || payload.code === 'DUPLICATE') {
-        setMensajeAlerta("🔒 Alerta de Integridad: Ya existe un registro de asistencia y un intento en curso con estas credenciales.");
+        setMensajeAlerta("Ya existe un registro de asistencia con estas credenciales.");
         setIsConnecting(false);
         return;
       }
@@ -195,7 +213,7 @@ function RegistroFormContent() {
 } catch (error) {
       console.error("Error en registro:", error);
       setMensajeAlerta("Falla técnica de sincronización. Intente nuevamente.");
-    } // LINE 175: CORRECCIÓN DE TIPEO
+    }
     finally {
       setIsConnecting(false);
     }
@@ -298,11 +316,11 @@ function RegistroFormContent() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Código Estudiantil:</label>
+                        <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Código (opcional):</label>
                         <input
                           type="text"
-                          maxLength={8}
-                          placeholder="Ej: 2214056"
+                          maxLength={32}
+                          placeholder="Opcional en demo"
                           value={codigo}
                           onChange={(e) => setCodigo(e.target.value)}
                           className="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono transition-all"
@@ -310,10 +328,10 @@ function RegistroFormContent() {
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Cédula de Ciudadanía:</label>
+                        <label className="block text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Documento (opcional):</label>
                         <input
                           type="text"
-                          placeholder="Número de documento..."
+                          placeholder="Opcional"
                           value={documento}
                           onChange={(e) => setDocumento(e.target.value)}
                           className="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono font-semibold transition-all"
