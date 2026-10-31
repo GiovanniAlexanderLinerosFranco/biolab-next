@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a2b24">
+  <title>Panel docente · MathStudio Samuelito</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #24382e, #13201b); color: #f4efe2; font-family: "Source Sans 3", sans-serif; }
+    h1, h2, h3 { font-family: Fraunces, serif; }
+    a { color: #f6e2a8; }
+    main { max-width: 62rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    .tarjeta { background: rgba(0,0,0,.18); border: 1px solid rgba(244,239,226,.22); border-radius: 1.1rem; padding: 1rem 1.05rem; margin: 0 0 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid rgba(244,239,226,.28); padding: .55rem .65rem; text-align: left; vertical-align: top; }
+    .acierto { box-shadow: inset 4px 0 0 #86efac; }
+    .fallo { box-shadow: inset 4px 0 0 #fda4af; }
+    .gran { font-family: Fraunces, serif; font-size: 3rem; color: #f6e2a8; margin: .2rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="index.html">Volver al tutor de Samuelito</a></p>
+    <header class="mt-4">
+      <p style="letter-spacing:.14em;text-transform:uppercase;color:#f6e2a8;font-size:.8rem;font-weight:700;">Pizarra del docente</p>
+      <h1>MathStudio: prueba de matemáticas de Samuelito</h1>
+      <p>Este panel lee el último intento guardado en este navegador. La prueba cambia de preguntas cada vez, porque el tutor propone ejercicios distintos de factorización y de estadística.</p>
+    </header>
+
+    <section class="tarjeta" aria-labelledby="titulo-intento">
+      <h2 id="titulo-intento">Último intento</h2>
+      <div id="intento"></div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Pauta de diagnóstico rápido</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Puntaje</th><th>Lectura</th></tr></thead>
+          <tbody>
+            <tr><th>7–8</th><td>Dominio sólido. Profundizar mezclando un caso de factorización con la lectura de una tabla.</td></tr>
+            <tr><th>5–6</th><td>Comprensión parcial. Reforzar la habilidad concreta que falló, no todo el tema de corrido.</td></tr>
+            <tr><th>3–4</th><td>Vacíos importantes. Rehacer con calma los casos de factorización fallados y después la mediana o la moda.</td></tr>
+            <tr><th>0–2</th><td>Volver a guiar desde el factor común, la diferencia de cuadrados y la media de una tabla pequeña.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Cómo acompañar cualquier ejercicio</h2>
+      <h3>Factorización</h3>
+      <ul>
+        <li>Factor común: número o potencia de x que esté en todos los términos.</li>
+        <li>Diferencia de cuadrados: a² − b² = (a − b)(a + b).</li>
+        <li>Suma de cubos: a³ + b³ = (a + b)(a² − ab + b²). Diferencia: a³ − b³ = (a − b)(a² + ab + b²).</li>
+        <li>Trinomio x² + bx + c: dos enteros que sumen b y multipliquen c.</li>
+        <li>Trinomio ax² + bx + c: multiplicar y dividir por a, cambiar y = ax, factorizar y repartir el divisor.</li>
+        <li>Agrupación: cuatro términos con un binomio común, y después el caso que quede.</li>
+      </ul>
+      <h3>Estadística de datos agrupados</h3>
+      <ul>
+        <li>Marca de clase xi = (límite inferior + límite superior) / 2.</li>
+        <li>Media x̄ = Σ(fi · xi) / n.</li>
+        <li>Mediana: clase donde la frecuencia acumulada alcanza n/2. Me = L + ((n/2 − F anterior) / f) · c. Pide clases de la misma amplitud.</li>
+        <li>Moda: clase de mayor frecuencia. Mo = L + (d1 / (d1 + d2)) · c, con d1 y d2 las diferencias de frecuencia hacia la clase anterior y la siguiente.</li>
+      </ul>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Preguntas de este intento</h2>
+      <div id="matriz" style="overflow-x:auto"></div>
+    </section>
+  </main>
+  <script>
+    var clave = "mathstudio-samuelito-diagnostico";
+    var caja = document.getElementById("intento");
+    var matriz = document.getElementById("matriz");
+    var crudo = localStorage.getItem(clave);
+    if (!crudo) {
+      caja.textContent = "Samuelito todavía no termina una prueba en este navegador. Cuando la envíe, el puntaje y las explicaciones aparecen aquí.";
+      matriz.textContent = "Aún no hay preguntas de un intento.";
+    } else {
+      var dato = JSON.parse(crudo);
+      var fecha = new Date(dato.fecha);
+      var cuando = fecha.toLocaleString("es-CO", { timeZone: "America/Bogota" });
+      caja.innerHTML = "<p class='gran'>" + dato.puntaje + "<span style='font-size:1.1rem;color:#d6d3c8'> / 8</span></p><p>" + cuando + " (hora de Bogotá)</p><p>" + dato.recomendacion + "</p>";
+      var html = "<table><thead><tr><th>#</th><th>Habilidad</th><th>Enunciado</th><th>Respuesta de Samuelito</th><th>Respuesta esperada</th><th>Explicación</th></tr></thead><tbody>";
+      dato.preguntas.forEach(function (p, i) {
+        var bien = dato.correctas[i];
+        html += "<tr class='" + (bien ? "acierto" : "fallo") + "'><td>" + (i + 1) + "</td><td>" + p.area + " · " + p.habilidad + "</td><td>" + p.enunciado + "</td><td>" + (p.opciones[dato.respuestas[i]] || "—") + "</td><td>" + p.opciones[p.correcta] + "</td><td>" + p.explicacion + "</td></tr>";
+      });
+      matriz.innerHTML = html + "</tbody></table>";
+    }
+  </script>
+</body>
+</html>
