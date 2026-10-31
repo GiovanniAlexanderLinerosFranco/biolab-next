@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba final de matemáticas y estadística de Samuelito</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    .opcion:has(input:checked) {
+      border-color: #818cf8;
+      background: rgba(49, 46, 129, 0.45);
+    }
+    .opcion.marca-bien {
+      border-color: #34d399;
+      background: rgba(6, 78, 59, 0.55);
+    }
+    .opcion.marca-mal {
+      border-color: #fb7185;
+      background: rgba(136, 19, 55, 0.4);
+    }
+    :focus-visible {
+      outline: 3px solid #a5b4fc;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
+  <div class="max-w-3xl mx-auto space-y-8">
+    <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-indigo-400">Prueba final evaluativa</h1>
+        <p class="text-sm text-slate-400 mt-1">Estudiante: <strong class="text-slate-200">Samuelito</strong>. Matemáticas y estadística.</p>
+      </div>
+      <div class="text-left sm:text-right">
+        <span id="score-badge" class="inline-block bg-indigo-950 text-indigo-200 font-bold text-lg px-4 py-2 rounded-xl border border-indigo-700">
+          Puntaje: <span id="score">0</span> / 15
+        </span>
+      </div>
+    </header>
+
+    <p class="text-slate-300 text-sm">Son 15 preguntas en tres secciones. Elige una opción en cada una y, al final, pulsa el botón de evaluar. Si el puntaje es 12 o más, hay una celebración.</p>
+
+    <form id="quiz-form" class="space-y-6">
+      <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-6" aria-labelledby="sec-estadistica">
+        <h2 id="sec-estadistica" class="text-xl font-bold text-emerald-400 border-b border-slate-700 pb-2">Sección 1. Estadística</h2>
+
+        <article class="q-block space-y-3" data-name="q1" data-correct="A" data-respuesta="A) 9 cuadernos">
+          <p class="font-medium">1. Las ventas de cuadernos de una semana fueron 8, 5, 12, 8, 15, 8 y 7. ¿Cuál es la media \(\bar{x}\)?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q1" value="A"> <span>A) 9 cuadernos</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q1" value="B"> <span>B) 8 cuadernos</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q1" value="C"> <span>C) 10 cuadernos</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q2" data-correct="B" data-respuesta="B) Moda = 8 y mediana = 8">
+          <p class="font-medium">2. Con los mismos datos, 8, 5, 12, 8, 15, 8 y 7, ¿cuáles son la moda \(M_o\) y la mediana?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q2" value="A"> <span>A) Moda = 5 y mediana = 8</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q2" value="B"> <span>B) Moda = 8 y mediana = 8</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q2" value="C"> <span>C) Moda = 8 y mediana = 7</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q3" data-correct="C" data-respuesta="C) 10">
+          <p class="font-medium">3. ¿Cuál es el rango de esas ventas? El rango es el dato máximo menos el dato mínimo.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q3" value="A"> <span>A) 7</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q3" value="B"> <span>B) 12</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q3" value="C"> <span>C) 10</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q4" data-correct="A" data-respuesta="A) 3.8">
+          <p class="font-medium">4. Horas de estudio de 20 estudiantes, en datos agrupados:</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="text-slate-300">
+                  <th class="border border-slate-600 p-2 text-left">Intervalo</th>
+                  <th class="border border-slate-600 p-2">\(f_i\)</th>
+                  <th class="border border-slate-600 p-2">Marca \(x_i\)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="border border-slate-600 p-2">[0, 2)</td><td class="border border-slate-600 p-2 text-center">4</td><td class="border border-slate-600 p-2 text-center">1</td></tr>
+                <tr><td class="border border-slate-600 p-2">[2, 4)</td><td class="border border-slate-600 p-2 text-center">6</td><td class="border border-slate-600 p-2 text-center">3</td></tr>
+                <tr><td class="border border-slate-600 p-2">[4, 6)</td><td class="border border-slate-600 p-2 text-center">8</td><td class="border border-slate-600 p-2 text-center">5</td></tr>
+                <tr><td class="border border-slate-600 p-2">[6, 8)</td><td class="border border-slate-600 p-2 text-center">2</td><td class="border border-slate-600 p-2 text-center">7</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="font-medium">¿Cuál es la media \(\bar{x} = \dfrac{\sum f_i x_i}{n}\)?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q4" value="A"> <span>A) 3.8</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q4" value="B"> <span>B) 4</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q4" value="C"> <span>C) 4.5</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q5" data-correct="B" data-respuesta="B) 4">
+          <p class="font-medium">5. Con la tabla de la pregunta 4, \(n = 20\). La clase mediana es \([2, 4)\), con \(L = 2\), frecuencia acumulada anterior \(F = 4\), frecuencia \(f = 6\) y amplitud \(c = 2\). ¿Cuál es la mediana?</p>
+          <p class="text-sm text-slate-300">\(Me = L + \dfrac{\frac{n}{2} - F}{f} \cdot c\)</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q5" value="A"> <span>A) 3.8</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q5" value="B"> <span>B) 4</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q5" value="C"> <span>C) 4.5</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+      </section>
+
+      <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-6" aria-labelledby="sec-factor">
+        <h2 id="sec-factor" class="text-xl font-bold text-sky-400 border-b border-slate-700 pb-2">Sección 2. Factorización de polinomios</h2>
+
+        <article class="q-block space-y-3" data-name="q6" data-correct="A" data-respuesta="A) \(5a^{2}b^{2}(3a^{2}b - 5b^{3} + 1)\)">
+          <p class="font-medium">6. Factor común. Factoriza \(15a^{4}b^{3} - 25a^{2}b^{5} + 5a^{2}b^{2}\).</p>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q6" value="A"> <span>A) \(5a^{2}b^{2}(3a^{2}b - 5b^{3} + 1)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q6" value="B"> <span>B) \(5ab(3a^{2}b - 5b^{2})\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q6" value="C"> <span>C) \(a^{2}b^{2}(15a^{2}b - 25b^{3} + 5)\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q7" data-correct="B" data-respuesta="B) \((x - 2)(3x^{2} + 4)\)">
+          <p class="font-medium">7. Agrupación. Factoriza \(3x^{3} - 6x^{2} + 4x - 8\).</p>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q7" value="A"> <span>A) \((x + 2)(3x^{2} - 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q7" value="B"> <span>B) \((x - 2)(3x^{2} + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q7" value="C"> <span>C) \((3x - 2)(x^{2} + 4)\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q8" data-correct="C" data-respuesta="C) \((7x^{3} - 8y^{2})(7x^{3} + 8y^{2})\)">
+          <p class="font-medium">8. Diferencia de cuadrados. Factoriza \(49x^{6} - 64y^{4}\).</p>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q8" value="A"> <span>A) \((7x^{3} - 8y^{2})^{2}\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q8" value="B"> <span>B) \((7x^{2} - 8y)(7x^{2} + 8y)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q8" value="C"> <span>C) \((7x^{3} - 8y^{2})(7x^{3} + 8y^{2})\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q9" data-correct="A" data-respuesta="A) \((x - 2)(x^{2} + 2x + 4)\)">
+          <p class="font-medium">9. Diferencia de cubos. Factoriza \(x^{3} - 8\).</p>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q9" value="A"> <span>A) \((x - 2)(x^{2} + 2x + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q9" value="B"> <span>B) \((x - 2)(x^{2} - 2x + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q9" value="C"> <span>C) \((x - 2)^{3}\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q10" data-correct="A" data-respuesta="A) \((x - 5)(x - 4)\)">
+          <p class="font-medium">10. Trinomio \(x^{2} + bx + c\). Factoriza \(x^{2} - 9x + 20\).</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q10" value="A"> <span>A) \((x - 5)(x - 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q10" value="B"> <span>B) \((x + 5)(x + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q10" value="C"> <span>C) \((x - 10)(x + 1)\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q11" data-correct="B" data-respuesta="B) \((x + 2)(3x + 4)\)">
+          <p class="font-medium">11. Trinomio \(ax^{2} + bx + c\). Factoriza \(3x^{2} + 10x + 8\).</p>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q11" value="A"> <span>A) \((3x + 2)(x + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q11" value="B"> <span>B) \((x + 2)(3x + 4)\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q11" value="C"> <span>C) \((3x + 8)(x + 1)\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+      </section>
+
+      <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-6" aria-labelledby="sec-ecuaciones">
+        <h2 id="sec-ecuaciones" class="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2">Sección 3. Ecuaciones y fracciones algebraicas</h2>
+
+        <article class="q-block space-y-3" data-name="q12" data-correct="A" data-respuesta="A) \(t = 3\) segundos">
+          <p class="font-medium">12. Proyectil. La altura es \(p = -5t^{2} + 13t + 6\), con \(t\) en segundos. ¿En qué segundo toca el suelo, es decir, \(p = 0\)? Descarta el tiempo negativo.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q12" value="A"> <span>A) \(t = 3\) segundos</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q12" value="B"> <span>B) \(t = 2\) segundos</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q12" value="C"> <span>C) \(t = 5\) segundos</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q13" data-correct="C" data-respuesta="C) 6 metros">
+          <p class="font-medium">13. Terreno rectangular. El área es \(60\,\mathrm{m}^{2}\) y el largo mide 4 metros más que el ancho. ¿Cuánto mide el ancho?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q13" value="A"> <span>A) 10 metros</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q13" value="B"> <span>B) 8 metros</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q13" value="C"> <span>C) 6 metros</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q14" data-correct="A" data-respuesta="A) 2 horas">
+          <p class="font-medium">14. Operarios. El primero termina una cerca en 6 horas y el segundo en 3 horas. Si trabajan juntos, sin estorbarse, ¿en cuánto tiempo la terminan?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q14" value="A"> <span>A) 2 horas</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q14" value="B"> <span>B) 4 horas y media</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q14" value="C"> <span>C) 9 horas</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+
+        <article class="q-block space-y-3" data-name="q15" data-correct="C" data-respuesta="C) \(\dfrac{x - 4}{x + 3}\)">
+          <p class="font-medium">15. Simplifica la fracción algebraica \(\dfrac{x^{2} - 16}{x^{2} + 7x + 12}\), con \(x \neq -4\) y \(x \neq -3\).</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q15" value="A"> <span>A) \(\dfrac{x + 4}{x + 3}\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q15" value="B"> <span>B) \(\dfrac{x - 4}{x - 3}\)</span></label>
+            <label class="opcion p-3 bg-slate-900/60 rounded-xl border border-slate-700 cursor-pointer hover:border-indigo-500 flex items-center gap-2"><input type="radio" name="q15" value="C"> <span>C) \(\dfrac{x - 4}{x + 3}\)</span></label>
+          </div>
+          <div class="feedback hidden text-sm p-3 rounded-lg font-medium"></div>
+        </article>
+      </section>
+
+      <button type="button" id="evaluar" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 font-bold text-lg text-white rounded-2xl shadow-lg transition duration-200">
+        Evaluar Respuestas de Samuelito
+      </button>
+      <p id="resumen" class="hidden text-center text-lg font-semibold" role="status"></p>
+    </form>
+  </div>
+
+  <script>
+    function typeset(nodo) {
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([nodo]).catch(function () {});
+      }
+    }
+
+    function evaluateQuiz() {
+      var score = 0;
+      var preguntas = document.querySelectorAll(".q-block");
+
+      preguntas.forEach(function (bloque) {
+        var correcta = bloque.getAttribute("data-correct");
+        var nombre = bloque.getAttribute("data-name");
+        var textoCorrecto = bloque.getAttribute("data-respuesta");
+        var elegida = bloque.querySelector('input[name="' + nombre + '"]:checked');
+        var aviso = bloque.querySelector(".feedback");
+
+        bloque.querySelectorAll(".opcion").forEach(function (opcion) {
+          opcion.classList.remove("marca-bien", "marca-mal");
+        });
+
+        aviso.classList.remove("hidden", "bg-emerald-950", "text-emerald-300", "bg-rose-950", "text-rose-300");
+
+        var inputCorrecto = bloque.querySelector('input[value="' + correcta + '"]');
+        if (inputCorrecto) inputCorrecto.closest(".opcion").classList.add("marca-bien");
+
+        if (elegida && elegida.value === correcta) {
+          score += 1;
+          aviso.classList.add("bg-emerald-950", "text-emerald-300");
+          aviso.innerHTML = "Correcto.";
+        } else {
+          if (elegida) elegida.closest(".opcion").classList.add("marca-mal");
+          aviso.classList.add("bg-rose-950", "text-rose-300");
+          aviso.innerHTML = "Incorrecto. La respuesta correcta es " + textoCorrecto + ".";
+          typeset(aviso);
+        }
+      });
+
+      document.getElementById("score").textContent = String(score);
+      var resumen = document.getElementById("resumen");
+      resumen.classList.remove("hidden");
+      if (score >= 12) {
+        resumen.textContent = "Puntaje " + score + " de 15. Dominio sólido.";
+        if (typeof confetti === "function") {
+          confetti({ particleCount: 140, spread: 80, origin: { y: 0.65 } });
+          setTimeout(function () {
+            confetti({ particleCount: 90, spread: 110, origin: { y: 0.45 } });
+          }, 280);
+        }
+      } else if (score >= 9) {
+        resumen.textContent = "Puntaje " + score + " de 15. Hay una base firme y todavía conviene repasar las que quedaron en rojo.";
+      } else {
+        resumen.textContent = "Puntaje " + score + " de 15. Conviene rehacer con calma las preguntas marcadas y volver a evaluar.";
+      }
+
+      document.getElementById("score-badge").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    document.getElementById("evaluar").addEventListener("click", evaluateQuiz);
+  </script>
+</body>
+</html>
