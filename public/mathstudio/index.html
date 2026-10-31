@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="Prueba de matemáticas para Samuelito: factorización y estadística.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MathStudio">
+  <title>Prueba de matemáticas para Samuelito</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,650&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="engine.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Source Sans 3", sans-serif; background: #f6f1e7; color: #1e1b4b; }
+    h1, h2, h3 { font-family: Fraunces, serif; letter-spacing: -0.02em; }
+    .panel { display: none; }
+    .panel.activo { display: block; }
+    .opcion, .btn, .pestana { min-height: 2.9rem; }
+    .opcion.bien { background: #dcfce7; border-color: #15803d; }
+    .opcion.mal { background: #ffe4e6; border-color: #be123c; }
+    .paso { display: none; }
+    .paso.visible { display: block; }
+    canvas { width: 100%; height: auto; background: #fff; border-radius: 1rem; }
+    :focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="bg-indigo-700 text-white">
+    <div class="max-w-3xl mx-auto px-4 py-6">
+      <p class="uppercase tracking-widest text-xs font-semibold text-indigo-100">MathStudio</p>
+      <h1 class="text-3xl mt-1">Prueba de matemáticas para Samuelito</h1>
+      <p class="mt-2 text-indigo-50">Hoy estás viendo álgebra, en los casos de factorización, y también estadística. La prueba mezcla los dos temas. El tutor además propone ejercicios nuevos y puede acompañar el polinomio o la tabla que traigas.</p>
+    </div>
+  </header>
+
+  <nav class="bg-white border-b border-indigo-100 sticky top-0 z-10" aria-label="Secciones">
+    <div class="max-w-3xl mx-auto px-2 py-2 flex gap-2 overflow-x-auto" role="tablist">
+      <button class="pestana px-4 rounded-full bg-indigo-600 text-white font-semibold" role="tab" aria-selected="true" data-panel="prueba"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i> Prueba</button>
+      <button class="pestana px-4 rounded-full bg-white text-indigo-900 border border-indigo-200 font-semibold" role="tab" aria-selected="false" data-panel="factor"><i class="fa-solid fa-superscript" aria-hidden="true"></i> Factorización</button>
+      <button class="pestana px-4 rounded-full bg-white text-indigo-900 border border-indigo-200 font-semibold" role="tab" aria-selected="false" data-panel="estadistica"><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Estadística</button>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-4 py-6">
+    <section id="prueba" class="panel activo" role="tabpanel">
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100">
+        <h2 class="text-2xl">La prueba</h2>
+        <p class="mt-2">Son 8 preguntas. Unas piden factorizar o reconocer el caso. Otras piden leer una tabla o unos datos sueltos. Al elegir ves enseguida por qué.</p>
+        <p class="mt-4"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="empezar">Empezar la prueba</button></p>
+        <div id="zona-pregunta" class="mt-5" hidden>
+          <p id="progreso" class="text-sm font-semibold text-indigo-700"></p>
+          <p id="habilidad" class="text-sm mt-1"></p>
+          <h3 id="enunciado" class="text-xl mt-2"></h3>
+          <div id="opciones" class="mt-4 grid gap-2"></div>
+          <div id="feedback" class="mt-4 rounded-2xl p-4 hidden"></div>
+          <p class="mt-4"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="siguiente" hidden>Siguiente</button></p>
+        </div>
+        <div id="resumen" class="mt-5" hidden>
+          <h3 class="text-2xl">Resultado</h3>
+          <p id="puntaje" class="text-4xl font-semibold text-indigo-700 mt-2"></p>
+          <p id="recomendacion" class="mt-3"></p>
+          <ul id="detalle-habilidades" class="mt-3 list-disc pl-5"></ul>
+          <p class="mt-4"><button type="button" class="btn px-5 rounded-full border border-indigo-300 font-semibold" id="otra-prueba">Otra prueba</button></p>
+        </div>
+      </article>
+    </section>
+
+    <section id="factor" class="panel" role="tabpanel">
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100">
+        <h2 class="text-2xl">Casos de factorización</h2>
+        <p class="mt-2">Una variable, coeficientes enteros, potencia hasta 5. El tutor nombra el caso y muestra una línea cada vez.</p>
+        <ul class="mt-3 grid gap-1 text-sm">
+          <li><strong>Factor común.</strong> Un número o una x sale de todos los términos.</li>
+          <li><strong>Diferencia de cuadrados.</strong> Dos términos cuadrados restados: a² − b².</li>
+          <li><strong>Suma o diferencia de cubos.</strong> a³ ± b³.</li>
+          <li><strong>Trinomio cuadrado perfecto.</strong> El cuadrado de un binomio.</li>
+          <li><strong>Trinomio x² + bx + c.</strong> Dos enteros que sumen b y multipliquen c.</li>
+          <li><strong>Trinomio ax² + bx + c.</strong> Se multiplica y se divide por a.</li>
+          <li><strong>Agrupación.</strong> Cuatro términos que comparten un binomio.</li>
+        </ul>
+      </article>
+
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100 mt-4">
+        <h3 class="text-xl">Ejercicio que propone el tutor</h3>
+        <label class="block mt-3 text-sm font-semibold" for="caso">Caso</label>
+        <select id="caso" class="mt-1 w-full rounded-xl border border-indigo-200 p-3 bg-white"></select>
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="otro-factor">Otro ejercicio</button></p>
+        <p id="expr-factor" class="mt-4 text-2xl"></p>
+        <div id="ops-factor" class="mt-3 grid gap-2"></div>
+        <div id="feed-factor" class="mt-3 rounded-2xl p-4 hidden"></div>
+        <div id="pasos-factor" class="mt-3 grid gap-2"></div>
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full border border-indigo-300 font-semibold" id="paso-factor" hidden>Siguiente paso</button></p>
+      </article>
+
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100 mt-4">
+        <h3 class="text-xl">Trae tu polinomio</h3>
+        <label class="block mt-3 text-sm font-semibold" for="poly">Escríbelo con x, por ejemplo 2x^2+7x+3 o x³−8</label>
+        <input id="poly" class="mt-1 w-full rounded-xl border border-indigo-200 p-3" inputmode="text" autocomplete="off" placeholder="x^2-25">
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="ayudar">Ayúdame con este</button></p>
+        <p id="error-poly" class="mt-2 text-rose-700" role="alert"></p>
+        <div id="pasos-propio" class="mt-3 grid gap-2"></div>
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full border border-indigo-300 font-semibold" id="paso-propio" hidden>Siguiente paso</button></p>
+        <div id="dibujo-cuadrados" class="mt-4" hidden>
+          <h3 class="text-lg">Idea geométrica de la diferencia de cuadrados</h3>
+          <p class="text-sm mt-1">Un cuadrado grande menos un cuadrado pequeño deja una región que se reordena en un rectángulo (a − b) por (a + b).</p>
+          <svg viewBox="0 0 280 120" class="mt-2 w-full max-w-md" role="img" aria-label="Cuadrado de lado a menos cuadrado de lado b, reordenado en un rectángulo.">
+            <rect x="8" y="8" width="100" height="100" fill="#e0e7ff" stroke="#4338ca" stroke-width="2"/>
+            <rect x="68" y="8" width="40" height="40" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+            <text x="40" y="68" font-size="14" fill="#312e81">a</text>
+            <text x="78" y="32" font-size="12" fill="#9a3412">b</text>
+            <text x="140" y="60" font-size="22" fill="#4338ca">→</text>
+            <rect x="170" y="28" width="96" height="60" fill="#e0e7ff" stroke="#4338ca" stroke-width="2"/>
+            <text x="188" y="62" font-size="13" fill="#312e81">a − b</text>
+          </svg>
+        </div>
+      </article>
+    </section>
+
+    <section id="estadistica" class="panel" role="tabpanel">
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100">
+        <h2 class="text-2xl">Estadística que propone el tutor</h2>
+        <p class="mt-2">Cada vez aparece una tabla distinta. Calcula y después mira el procedimiento y el histograma.</p>
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="otra-tabla">Otra tabla</button></p>
+        <h3 id="titulo-tabla" class="text-lg mt-4"></h3>
+        <div class="overflow-x-auto mt-2">
+          <table class="w-full text-sm border-collapse" id="tabla-propuesta"></table>
+        </div>
+        <p id="pregunta-tabla" class="mt-4 font-semibold"></p>
+        <div id="ops-tabla" class="mt-2 grid gap-2"></div>
+        <div id="feed-tabla" class="mt-3 rounded-2xl p-4 hidden"></div>
+        <div id="pasos-tabla" class="mt-3 grid gap-2"></div>
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full border border-indigo-300 font-semibold" id="paso-tabla" hidden>Siguiente paso</button></p>
+        <canvas id="histo" class="mt-4 border border-indigo-100" width="640" height="320" role="img" aria-label="Histograma de la tabla propuesta"></canvas>
+      </article>
+
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100 mt-4">
+        <h3 class="text-xl">Trae tu tabla de datos agrupados</h3>
+        <p class="mt-2 text-sm">Límite inferior, límite superior y frecuencia. Si las amplitudes no coinciden, calculo la media y te digo que mediana y moda escolares piden la misma amplitud.</p>
+        <div id="filas-propias" class="mt-3 grid gap-2"></div>
+        <p class="mt-3 flex flex-wrap gap-2">
+          <button type="button" class="btn px-4 rounded-full border border-indigo-300 font-semibold" id="agregar-fila">Agregar fila</button>
+          <button type="button" class="btn px-4 rounded-full bg-indigo-600 text-white font-semibold" id="calcular-tabla">Calcular</button>
+          <button type="button" class="btn px-4 rounded-full border border-indigo-300 font-semibold" id="ejemplo-120">Cargar el ejemplo de 120 jóvenes</button>
+        </p>
+        <p id="error-tabla" class="mt-2 text-rose-700" role="alert"></p>
+        <div id="pasos-propia-tabla" class="mt-3 grid gap-2"></div>
+        <canvas id="histo-propio" class="mt-4 border border-indigo-100" width="640" height="320" hidden></canvas>
+      </article>
+
+      <article class="bg-white rounded-3xl p-5 shadow-sm border border-indigo-100 mt-4">
+        <h3 class="text-xl">Datos sueltos</h3>
+        <label class="block mt-2 text-sm font-semibold" for="sueltos">Escríbelos separados por comas o espacios</label>
+        <input id="sueltos" class="mt-1 w-full rounded-xl border border-indigo-200 p-3" placeholder="3, 5, 5, 8, 9">
+        <p class="mt-3"><button type="button" class="btn px-5 rounded-full bg-indigo-600 text-white font-semibold" id="calcular-sueltos">Calcular media, mediana y moda</button></p>
+        <p id="error-sueltos" class="mt-2 text-rose-700" role="alert"></p>
+        <div id="resultado-sueltos" class="mt-3"></div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="max-w-3xl mx-auto px-4 pb-10 text-sm text-indigo-900/80">
+    <button type="button" class="underline" id="abrir-docente">Docente</button>
+    <p class="mt-2">La prueba se guarda solo en este navegador.</p>
+  </footer>
+
+  <dialog id="dialogo-pin" class="rounded-3xl p-0 backdrop:bg-indigo-950/50">
+    <form method="dialog" class="p-5 w-[min(92vw,24rem)]">
+      <h2 class="text-xl">Acceso del docente</h2>
+      <p class="mt-2 text-sm">Escribe la clave numérica de acceso.</p>
+      <input id="pin" class="mt-3 w-full rounded-xl border border-indigo-200 p-3" inputmode="numeric" autocomplete="off" aria-label="Clave numérica de acceso">
+      <p id="pin-error" class="mt-2 text-rose-700 text-sm" role="alert"></p>
+      <p class="mt-4 flex gap-2 justify-end">
+        <button type="button" class="btn px-4 rounded-full border" id="cerrar-pin" value="cancel">Cerrar</button>
+        <button type="submit" class="btn px-4 rounded-full bg-indigo-600 text-white" id="enviar-pin">Entrar</button>
+      </p>
+    </form>
+  </dialog>
+
+  <script>
+    var MS = window.MathStudio;
+    var prueba = [];
+    var indice = 0;
+    var respuestas = [];
+    var pasoFactor = 0;
+    var pasoPropio = 0;
+    var pasoTabla = 0;
+    var ejercicioFactor = null;
+    var ejercicioTabla = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    document.querySelectorAll(".pestana").forEach(function (boton) {
+      boton.addEventListener("click", function () {
+        document.querySelectorAll(".pestana").forEach(function (p) {
+          var activo = p === boton;
+          p.className = "pestana px-4 rounded-full font-semibold " + (activo ? "bg-indigo-600 text-white" : "bg-white text-indigo-900 border border-indigo-200");
+          p.setAttribute("aria-selected", activo ? "true" : "false");
+        });
+        document.querySelectorAll(".panel").forEach(function (panel) {
+          panel.classList.toggle("activo", panel.id === boton.getAttribute("data-panel"));
+        });
+        if (boton.getAttribute("data-panel") === "estadistica") dibujarHisto("histo", ejercicioTabla);
+      });
+    });
+
+    function opcionesCercanas(valor) {
+      var red = Math.round(valor * 1000) / 1000;
+      var lista = [red, red + 0.5, red - 0.5, red + 1, red - 1];
+      var vistos = {};
+      return lista.filter(function (n) {
+        var t = MS.numTex(n);
+        if (vistos[t]) return false;
+        vistos[t] = true;
+        return true;
+      }).slice(0, 4).map(MS.numTex);
+    }
+
+    function pintarPasos(contenedor, pasos, cuantos) {
+      contenedor.innerHTML = "";
+      pasos.forEach(function (paso, i) {
+        var div = document.createElement("div");
+        div.className = "paso rounded-2xl bg-indigo-50 p-3" + (i < cuantos ? " visible" : "");
+        div.innerHTML = "<strong>" + paso.titulo + "</strong><p class='mt-1'>" + paso.texto + "</p>";
+        contenedor.appendChild(div);
+      });
+    }
+
+    function empezar(semilla) {
+      prueba = MS.armarDiagnostico(semilla || Date.now());
+      indice = 0;
+      respuestas = [];
+      $("resumen").hidden = true;
+      $("zona-pregunta").hidden = false;
+      mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+      var p = prueba[indice];
+      $("progreso").textContent = "Pregunta " + (indice + 1) + " de " + prueba.length;
+      $("habilidad").textContent = p.area + " · " + p.habilidad;
+      $("enunciado").textContent = p.enunciado;
+      $("feedback").hidden = true;
+      $("siguiente").hidden = true;
+      var caja = $("opciones");
+      caja.innerHTML = "";
+      p.opciones.forEach(function (texto, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "opcion text-left px-4 rounded-2xl border border-indigo-200 bg-white";
+        b.textContent = texto;
+        b.addEventListener("click", function () { responder(i); });
+        caja.appendChild(b);
+      });
+    }
+
+    function responder(i) {
+      var p = prueba[indice];
+      if (respuestas.length > indice) return;
+      respuestas[indice] = i;
+      var botones = $("opciones").querySelectorAll("button");
+      botones.forEach(function (b, k) {
+        b.disabled = true;
+        if (k === p.correcta) b.classList.add("bien");
+        else if (k === i) b.classList.add("mal");
+      });
+      var caja = $("feedback");
+      caja.hidden = false;
+      caja.className = "mt-4 rounded-2xl p-4 " + (i === p.correcta ? "bg-emerald-50" : "bg-rose-50");
+      caja.textContent = (i === p.correcta ? "Correcto. " : "Conviene revisar. ") + p.explicacion;
+      $("siguiente").hidden = false;
+      $("siguiente").textContent = indice === prueba.length - 1 ? "Ver resultado" : "Siguiente";
+    }
+
+    function cerrarPrueba() {
+      var correctas = prueba.map(function (p, i) { return respuestas[i] === p.correcta; });
+      var puntaje = correctas.filter(Boolean).length;
+      var fallos = {};
+      prueba.forEach(function (p, i) {
+        if (!correctas[i]) fallos[p.habilidad] = (fallos[p.habilidad] || 0) + 1;
+      });
+      var listaFallos = Object.keys(fallos);
+      var base;
+      if (puntaje >= 7) base = "Dominio sólido. Puedes profundizar mezclando un caso de factorización con la lectura de una tabla.";
+      else if (puntaje >= 5) base = "Hay una comprensión parcial. Refuerza las habilidades que quedaron en rojo.";
+      else if (puntaje >= 3) base = "Hay vacíos importantes. Vuelve a los casos de factorización que fallaste y a la lectura de la tabla, con el procedimiento abierto.";
+      else base = "Conviene volver a guiar desde el factor común, la diferencia de cuadrados y la media de una tabla pequeña.";
+      if (listaFallos.length) base += " Conviene repasar: " + listaFallos.join(", ") + ".";
+      var guardado = {
+        nombre: "Samuelito",
+        fecha: new Date().toISOString(),
+        preguntas: prueba,
+        respuestas: respuestas,
+        correctas: correctas,
+        puntaje: puntaje,
+        recomendacion: base
+      };
+      localStorage.setItem("mathstudio-samuelito-diagnostico", JSON.stringify(guardado));
+      $("zona-pregunta").hidden = true;
+      $("resumen").hidden = false;
+      $("puntaje").textContent = puntaje + " / 8";
+      $("recomendacion").textContent = base;
+      var ul = $("detalle-habilidades");
+      ul.innerHTML = "";
+      prueba.forEach(function (p, i) {
+        var li = document.createElement("li");
+        li.textContent = (correctas[i] ? "Acierto" : "Fallo") + " en " + p.habilidad + ".";
+        ul.appendChild(li);
+      });
+    }
+
+    $("empezar").addEventListener("click", function () { empezar(Date.now()); });
+    $("otra-prueba").addEventListener("click", function () { empezar(Date.now()); });
+    $("siguiente").addEventListener("click", function () {
+      if (indice === prueba.length - 1) cerrarPrueba();
+      else { indice++; mostrarPregunta(); }
+    });
+
+    var sel = $("caso");
+    var optTodos = document.createElement("option");
+    optTodos.value = "";
+    optTodos.textContent = "Cualquier caso";
+    sel.appendChild(optTodos);
+    MS.CASOS.forEach(function (caso) {
+      var o = document.createElement("option");
+      o.value = caso;
+      o.textContent = caso;
+      sel.appendChild(o);
+    });
+
+    function nuevoFactor() {
+      ejercicioFactor = MS.proponerFactor(sel.value || null, Date.now() + Math.floor(Math.random() * 10000));
+      $("expr-factor").textContent = ejercicioFactor.expresion;
+      $("feed-factor").hidden = true;
+      $("paso-factor").hidden = true;
+      pasoFactor = 0;
+      $("pasos-factor").innerHTML = "";
+      var caja = $("ops-factor");
+      caja.innerHTML = "";
+      ejercicioFactor.opciones.forEach(function (texto, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "opcion text-left px-4 rounded-2xl border border-indigo-200 bg-white";
+        b.textContent = texto;
+        b.addEventListener("click", function () {
+          caja.querySelectorAll("button").forEach(function (x, k) {
+            x.disabled = true;
+            if (k === ejercicioFactor.correcta) x.classList.add("bien");
+            else if (k === i) x.classList.add("mal");
+          });
+          var feed = $("feed-factor");
+          feed.hidden = false;
+          feed.className = "mt-3 rounded-2xl p-4 " + (i === ejercicioFactor.correcta ? "bg-emerald-50" : "bg-rose-50");
+          feed.textContent = (i === ejercicioFactor.correcta ? "Ese es el resultado. " : "El resultado es " + ejercicioFactor.resultado + ". ") + "Caso: " + ejercicioFactor.casos.join(", ") + ".";
+          pasoFactor = 1;
+          pintarPasos($("pasos-factor"), ejercicioFactor.pasos, 1);
+          $("paso-factor").hidden = ejercicioFactor.pasos.length <= 1;
+        });
+        caja.appendChild(b);
+      });
+    }
+
+    $("otro-factor").addEventListener("click", nuevoFactor);
+    sel.addEventListener("change", nuevoFactor);
+    $("paso-factor").addEventListener("click", function () {
+      if (!ejercicioFactor) return;
+      pasoFactor = Math.min(ejercicioFactor.pasos.length, pasoFactor + 1);
+      pintarPasos($("pasos-factor"), ejercicioFactor.pasos, pasoFactor);
+      if (pasoFactor >= ejercicioFactor.pasos.length) $("paso-factor").hidden = true;
+    });
+
+    function mostrarPropio(pasos) {
+      pasoPropio = 1;
+      pintarPasos($("pasos-propio"), pasos, 1);
+      $("paso-propio").hidden = pasos.length <= 1;
+      $("paso-propio").dataset.total = String(pasos.length);
+      $("dibujo-cuadrados").hidden = pasos.every(function (p) { return p.titulo.indexOf("cuadrados") === -1 && p.texto.indexOf("cuadrados") === -1; });
+    }
+    $("ayudar").addEventListener("click", function () {
+      $("error-poly").textContent = "";
+      try {
+        var hecho = MS.factorPoly($("poly").value);
+        mostrarPropio(hecho.pasos);
+      } catch (error) {
+        $("pasos-propio").innerHTML = "";
+        $("paso-propio").hidden = true;
+        $("error-poly").textContent = error.message;
+      }
+    });
+    $("paso-propio").addEventListener("click", function () {
+      var pasos = $("pasos-propio").querySelectorAll(".paso");
+      pasoPropio = Math.min(pasos.length, pasoPropio + 1);
+      pasos.forEach(function (p, i) { p.classList.toggle("visible", i < pasoPropio); });
+      if (pasoPropio >= pasos.length) $("paso-propio").hidden = true;
+    });
+
+    function dibujarHisto(id, pack) {
+      var lienzo = $(id);
+      if (!pack) return;
+      var filas = pack.stats ? pack.stats.filas : pack.filas;
+      var modal = pack.stats && pack.stats.detalleModa ? pack.stats.detalleModa.clase : null;
+      var ctx = lienzo.getContext("2d");
+      var w = lienzo.width;
+      var h = lienzo.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+      var max = Math.max.apply(null, filas.map(function (f) { return f.frecuencia; }));
+      var left = 48;
+      var base = h - 42;
+      var ancho = (w - left - 16) / filas.length;
+      ctx.strokeStyle = "#312e81";
+      ctx.beginPath();
+      ctx.moveTo(left, 16);
+      ctx.lineTo(left, base);
+      ctx.lineTo(w - 12, base);
+      ctx.stroke();
+      filas.forEach(function (f, i) {
+        var alto = (f.frecuencia / max) * (base - 28);
+        var esModal = modal && f.inferior === modal.inferior && f.frecuencia === modal.frecuencia;
+        ctx.fillStyle = esModal ? "#4f46e5" : "#a5b4fc";
+        ctx.fillRect(left + i * ancho + 8, base - alto, ancho - 16, alto);
+        ctx.fillStyle = "#1e1b4b";
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(String(f.frecuencia), left + i * ancho + ancho / 2, base - alto - 6);
+        ctx.fillText(MS.numTex(f.inferior) + "–" + MS.numTex(f.superior), left + i * ancho + ancho / 2, base + 18);
+      });
+    }
+
+    function preguntaTabla(pack) {
+      var tipos = ["media", "mediana", "moda"];
+      var tipo = tipos[Math.floor(Math.random() * tipos.length)];
+      if (tipo === "mediana" && pack.stats.mediana == null) tipo = "media";
+      if (tipo === "moda" && pack.stats.moda == null) tipo = "media";
+      var valor = pack.stats[tipo];
+      var nombre = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+      var opciones = opcionesCercanas(valor);
+      if (opciones.indexOf(MS.numTex(valor)) === -1) opciones[0] = MS.numTex(valor);
+      for (var i = opciones.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = opciones[i]; opciones[i] = opciones[j]; opciones[j] = t;
+      }
+      return { tipo: tipo, nombre: nombre, valor: valor, opciones: opciones, correcta: opciones.indexOf(MS.numTex(valor)) };
+    }
+
+    function pintarTabla(pack) {
+      var html = "<thead><tr><th class='border p-2 text-left'>Intervalo</th><th class='border p-2'>fi</th><th class='border p-2'>Marca</th></tr></thead><tbody>";
+      pack.filas.forEach(function (f) {
+        var marca = ((Number(f.inferior) + Number(f.superior)) / 2);
+        html += "<tr><td class='border p-2'>[" + MS.numTex(f.inferior) + ", " + MS.numTex(f.superior) + ")</td><td class='border p-2 text-center'>" + f.frecuencia + "</td><td class='border p-2 text-center'>" + MS.numTex(marca) + "</td></tr>";
+      });
+      $("tabla-propuesta").innerHTML = html + "</tbody>";
+      $("titulo-tabla").textContent = pack.titulo;
+    }
+
+    function nuevaTabla() {
+      ejercicioTabla = MS.proponerTabla(Date.now() + Math.floor(Math.random() * 10000));
+      ejercicioTabla.pregunta = preguntaTabla(ejercicioTabla);
+      pintarTabla(ejercicioTabla);
+      $("pregunta-tabla").textContent = "¿Cuál es la " + ejercicioTabla.pregunta.nombre.toLowerCase() + "?";
+      $("feed-tabla").hidden = true;
+      $("pasos-tabla").innerHTML = "";
+      $("paso-tabla").hidden = true;
+      pasoTabla = 0;
+      var caja = $("ops-tabla");
+      caja.innerHTML = "";
+      ejercicioTabla.pregunta.opciones.forEach(function (texto, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "opcion text-left px-4 rounded-2xl border border-indigo-200 bg-white";
+        b.textContent = texto;
+        b.addEventListener("click", function () {
+          caja.querySelectorAll("button").forEach(function (x, k) {
+            x.disabled = true;
+            if (k === ejercicioTabla.pregunta.correcta) x.classList.add("bien");
+            else if (k === i) x.classList.add("mal");
+          });
+          var feed = $("feed-tabla");
+          feed.hidden = false;
+          feed.className = "mt-3 rounded-2xl p-4 " + (i === ejercicioTabla.pregunta.correcta ? "bg-emerald-50" : "bg-rose-50");
+          feed.textContent = (i === ejercicioTabla.pregunta.correcta ? "Correcto. " : "El valor es " + MS.numTex(ejercicioTabla.pregunta.valor) + ". ") + "Abre el procedimiento.";
+          pasoTabla = 1;
+          pintarPasos($("pasos-tabla"), ejercicioTabla.pasos, 1);
+          $("paso-tabla").hidden = false;
+        });
+        caja.appendChild(b);
+      });
+      dibujarHisto("histo", ejercicioTabla);
+    }
+
+    $("otra-tabla").addEventListener("click", nuevaTabla);
+    $("paso-tabla").addEventListener("click", function () {
+      if (!ejercicioTabla) return;
+      pasoTabla = Math.min(ejercicioTabla.pasos.length, pasoTabla + 1);
+      pintarPasos($("pasos-tabla"), ejercicioTabla.pasos, pasoTabla);
+      if (pasoTabla >= ejercicioTabla.pasos.length) $("paso-tabla").hidden = true;
+    });
+
+    function filaVacia(a, b, f) {
+      var div = document.createElement("div");
+      div.className = "grid grid-cols-3 gap-2";
+      div.innerHTML = "<input class='inf rounded-xl border p-2' inputmode='decimal' placeholder='Inferior' value='" + (a ?? "") + "'><input class='sup rounded-xl border p-2' inputmode='decimal' placeholder='Superior' value='" + (b ?? "") + "'><input class='fre rounded-xl border p-2' inputmode='numeric' placeholder='Frecuencia' value='" + (f ?? "") + "'>";
+      $("filas-propias").appendChild(div);
+    }
+    filaVacia();
+    filaVacia();
+    filaVacia();
+    $("agregar-fila").addEventListener("click", function () { filaVacia(); });
+
+    function leerFilas() {
+      return Array.prototype.map.call($("filas-propias").children, function (fila) {
+        return {
+          inferior: fila.querySelector(".inf").value,
+          superior: fila.querySelector(".sup").value,
+          frecuencia: fila.querySelector(".fre").value
+        };
+      }).filter(function (f) { return f.inferior !== "" || f.superior !== "" || f.frecuencia !== ""; });
+    }
+
+    function calcularFilas(filas) {
+      $("error-tabla").textContent = "";
+      try {
+        var stats = MS.groupedStats(filas);
+        var pasos = MS.pasosAgrupados(stats);
+        pintarPasos($("pasos-propia-tabla"), pasos, pasos.length);
+        $("pasos-propia-tabla").querySelectorAll(".paso").forEach(function (p) { p.classList.add("visible"); });
+        $("histo-propio").hidden = false;
+        dibujarHisto("histo-propio", { stats: stats });
+      } catch (error) {
+        $("error-tabla").textContent = error.message;
+      }
+    }
+    $("calcular-tabla").addEventListener("click", function () { calcularFilas(leerFilas()); });
+    $("ejemplo-120").addEventListener("click", function () {
+      $("filas-propias").innerHTML = "";
+      MS.tablaEjemplo120().forEach(function (f) { filaVacia(f.inferior, f.superior, f.frecuencia); });
+      calcularFilas(MS.tablaEjemplo120());
+    });
+
+    $("calcular-sueltos").addEventListener("click", function () {
+      $("error-sueltos").textContent = "";
+      var trozos = $("sueltos").value.split(/[^0-9.+-]+/).filter(Boolean);
+      try {
+        var r = MS.ungroupedStats(trozos);
+        var moda = r.modas.length ? r.modas.map(MS.numTex).join(", ") : "no hay un valor repetido";
+        $("resultado-sueltos").innerHTML = "<p>n = " + r.n + " y la suma es " + MS.numTex(r.suma) + ".</p><p>Media = " + MS.numTex(r.media) + ".</p><p>Mediana = " + MS.numTex(r.mediana) + ".</p><p>Moda = " + moda + ".</p>";
+      } catch (error) {
+        $("resultado-sueltos").innerHTML = "";
+        $("error-sueltos").textContent = error.message;
+      }
+    });
+
+    $("abrir-docente").addEventListener("click", function () {
+      $("pin").value = "";
+      $("pin-error").textContent = "";
+      $("dialogo-pin").showModal();
+    });
+    $("cerrar-pin").addEventListener("click", function () { $("dialogo-pin").close(); });
+    $("enviar-pin").addEventListener("click", function (evento) {
+      evento.preventDefault();
+      if ($("pin").value === "2026") location.href = "docente.html";
+      else $("pin-error").textContent = "La clave no coincide.";
+    });
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
+    nuevoFactor();
+    nuevaTabla();
+  </script>
+</body>
+</html>
